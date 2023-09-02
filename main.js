@@ -3,7 +3,6 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { ClearPass } from 'three/addons/postprocessing/ClearPass.js';
 
 const container = document.getElementById("col1");
 var audioEnabled = false;
@@ -23,7 +22,7 @@ const horizontalFov = 10;
 camera.fov = (Math.atan(Math.tan(((horizontalFov / 2) * Math.PI) / 180) / camera.aspect) * 2 * 180) / Math.PI;
 camera.updateProjectionMatrix();
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
 
 renderer.setClearColor(0xff585c72);
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -32,14 +31,11 @@ renderer.setAnimationLoop(animate);
 
 const composer = new EffectComposer(renderer);
 
-composer.addPass(new ClearPass());
 composer.addPass(new RenderPass(scene, camera));
 
 container.appendChild(renderer.domElement);
 
 const loader = new GLTFLoader();
-
-
 
 new RGBELoader()
     .setPath('textures/')
