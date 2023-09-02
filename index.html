@@ -46,10 +46,6 @@
             #col2 {
                 width: 60%;
             }
-
-            canvas {
-                position: fixed;
-            }
         }
 
         @media all and (orientation:portrait) {
@@ -57,6 +53,10 @@
                 width: 100%;
                 height: 50%;
             }
+        }
+
+        canvas {
+            position: fixed;
         }
 
         ul {
@@ -75,6 +75,7 @@
         .content {
             margin: 2em 5%;
             text-align: center;
+            z-index: 100;
         }
 
         h1 {
@@ -116,15 +117,26 @@
         }
 
         i#audioToggle {
-            position:fixed;
+            position: fixed;
             left: 1rem;
             bottom: 1rem;
             font-size: 4em;
             cursor: pointer;
+            z-index: 200;
         }
-        
+
         i#audioToggle.bi-volume-mute-fill {
-            color:darkgray;
+            color: darkgray;
+        }
+
+        .double-ul {
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .double-ul li {
+            flex: 1;
         }
     </style>
 </head>
@@ -147,28 +159,57 @@
                 </p>
                 <ul class="list-group">
                     <li class="list-group-item">
-                        <a href="https://twitch.dremixam.com/"><i class="bi bi-twitch"></i> Twitch</a>
+                        <a target="_blank" href="https://twitch.dremixam.com/"><i class="bi bi-twitch"></i> Twitch</a>
                     </li>
                     <li class="list-group-item">
-                        <a href="https://ko-fi.com/dremixam"><i class="bi bi-coin"></i> Me soutenir sur Ko-fi</a>
+                        <a target="_blank" href="https://ko-fi.com/dremixam"><i class="bi bi-coin"></i> Me soutenir sur
+                            Ko-fi</a>
                     </li>
                     <li class="list-group-item">
-                        <a href="https://discord.dremixam.com/"><i class="bi bi-discord"></i> Discord</a>
+                        <a target="_blank" href="https://discord.dremixam.com/"><i class="bi bi-discord"></i>
+                            Discord</a>
                     </li>
                     <li class="list-group-item">
-                        <a href="https://lou.lt/@dremixam"><i class="bi bi-mastodon"></i> Mastodon</a>
+                        <a target="_blank" rel="me" href="https://lou.lt/@dremixam"><i class="bi bi-mastodon"></i>
+                            Mastodon</a>
                     </li>
                     <li class="list-group-item">
-                        <a href="https://www.instagram.com/dremixam/"><i class="bi bi-instagram"></i> Instagram</a>
+                        <a target="_blank" href="https://www.instagram.com/dremixam/"><i class="bi bi-instagram"></i>
+                            Instagram</a>
                     </li>
                     <li class="list-group-item">
-                        <a href="https://www.youtube.com/@DrEmixamTwitch"><i class="bi bi-youtube"></i> Youtube</a>
+                        <a target="_blank" href="https://www.youtube.com/@DrEmixamTwitch"><i class="bi bi-youtube"></i>
+                            Youtube</a>
                     </li>
                     <li class="list-group-item">
-                        <a href="https://www.tiktok.com/@dremixamtwitch?lang=fr"><i class="bi bi-tiktok"></i> Tik-Tok</a>
+                        <a target="_blank" href="https://www.tiktok.com/@dremixamtwitch?lang=fr"><i
+                                class="bi bi-tiktok"></i> Tik-Tok</a>
                     </li>
                     <li class="list-group-item">
-                        <a href="https://bigzbeul.com"><i class="bi bi-box"></i> Le Bigzbeul</a>
+                        <a target="_blank" href="https://onlyfans.com/leonlerobot">
+                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                style="height: 1.3em; vertical-align: middle;">
+                                <path fill="white"
+                                    d="M24 4.003h-4.015c-3.45 0-5.3.197-6.748 1.957a7.996 7.996 0 1 0 2.103 9.211c3.182-.231 5.39-2.134 6.085-5.173 0 0-2.399.585-4.43 0 4.018-.777 6.333-3.037 7.005-5.995zM5.61 11.999A2.391 2.391 0 0 1 9.28 9.97a2.966 2.966 0 0 1 2.998-2.528h.008c-.92 1.778-1.407 3.352-1.998 5.263A2.392 2.392 0 0 1 5.61 12Zm2.386-7.996a7.996 7.996 0 1 0 7.996 7.996 7.996 7.996 0 0 0-7.996-7.996Zm0 10.394A2.399 2.399 0 1 1 10.395 12a2.396 2.396 0 0 1-2.399 2.398Z" />
+                            </svg>
+                            Le OnlyFans de Léon</a>
+                    </li>
+                </ul>
+
+                <h2>Projets</h2>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <a target="_blank" href="https://bigzbeul.com"><i class="bi bi-box"></i> Le Bigzbeul</a>
+                    </li>
+                </ul>
+
+                <h2>Contact</h2>
+                <ul class="list-group double-ul">
+                    <li class="list-group-item">
+                        <a target="_blank" href="mailto:maxime@melinon.fr"><i class="bi bi-envelope-fill"></i> Mail</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a><i class="bi bi-discord"></i> DrEmixam</a>
                     </li>
                 </ul>
             </div>
