@@ -7,9 +7,10 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 const container = document.getElementById("col1");
 var audioEnabled = false;
 var timeout;
+var lastAudio = "";
 
 const WelcomeAudio = 'audio/1.ogg';
-const RandomAudio = ['audio/2.ogg', 'audio/3.ogg', 'audio/4.ogg', 'audio/5.ogg', 'audio/6.ogg', 'audio/7.ogg', 'audio/8.ogg', 'audio/9.ogg'];
+const RandomAudio = ['audio/2.ogg', 'audio/3.ogg', 'audio/4.ogg', 'audio/5.ogg', 'audio/6.ogg', 'audio/7.ogg', 'audio/8.ogg', 'audio/9.ogg', 'audio/10.ogg', 'audio/10.ogg', 'audio/12.ogg', 'audio/13.ogg', 'audio/14.ogg', 'audio/15.ogg', 'audio/16.ogg', 'audio/17.ogg', 'audio/18.ogg', 'audio/19.ogg'];
 
 const clock = new THREE.Clock();
 const scene = new THREE.Scene();
@@ -138,8 +139,11 @@ function playAudioVoice(audioSrc) {
             }
             timeout = setTimeout(function () {
                 if (!audioEnabled) return;
-                const randomIndex = Math.floor(Math.random() * RandomAudio.length);
-                const randomElement = RandomAudio[randomIndex];
+                var randomElement;
+                do {
+                    randomElement = RandomAudio[Math.floor(Math.random() * RandomAudio.length)];
+                } while (lastAudio == randomElement);
+                lastAudio = randomElement;
                 playAudioVoice(randomElement);
             }, Math.floor(Math.random() * 10000) + 10000);
         }
