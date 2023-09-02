@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ClearPass } from 'three/addons/postprocessing/ClearPass.js';
@@ -13,10 +14,6 @@ const RandomAudio = ['audio/2.ogg', 'audio/3.ogg', 'audio/4.ogg', 'audio/5.ogg',
 
 const clock = new THREE.Clock();
 const scene = new THREE.Scene();
-
-const textureLoader = new THREE.TextureLoader();
-const envmap = textureLoader.load('textures/workshop.jpg')
-scene.environment = envmap;
 
 const camera = new THREE.PerspectiveCamera(10, container.offsetWidth / container.offsetHeight, 10, 50);
 camera.position.z = 20;
@@ -42,15 +39,22 @@ container.appendChild(renderer.domElement);
 
 const loader = new GLTFLoader();
 
+
+
+new RGBELoader()
+    .setPath('textures/')
+    .load('workshop.hdr', function (texture) {
+        texture.mapping = THREE.EquirectangularReflectionMapping;
+        scene.environment = texture;
+    });
+
+
 var leon;
 var leftFan, rightFan, eye;
 var basePosition = { x: 0, y: 0, z: 0 };
 var baseRotation = { x: .3, y: .4, z: 0 };
 
 loader.load('/leon.glb', function (gltf) {
-
-    console.log(gltf);
-
     leon = gltf.scene.getObjectByName('Leon');
     leftFan = gltf.scene.getObjectByName('FansLeft');
     rightFan = gltf.scene.getObjectByName('FansRight');
@@ -58,11 +62,6 @@ loader.load('/leon.glb', function (gltf) {
 
     eye.material.emissive = new THREE.Color("hsl(203, 60%, 50%)");
     eye.material.emissiveIntensity = 0;
-
-
-
-
-
 
     scene.add(gltf.scene);
 });
@@ -75,10 +74,10 @@ scene.add(new THREE.AmbientLight(0xffffff, 1));
 
 function animate() {
     if (rightFan) {
-        rightFan.rotation.y += .3;
+        rightFan.rotation.y = 20 * clock.elapsedTime;
     }
     if (leftFan) {
-        leftFan.rotation.y -= .3;
+        leftFan.rotation.y = -20 * clock.elapsedTime;
     }
     if (leon) {
         leon.position.set(basePosition.x, basePosition.y + Math.sin(clock.getElapsedTime()) * .5, basePosition.z);
@@ -142,6 +141,7 @@ function playAudioVoice(audioSrc) {
                 eye.material.emissiveIntensity = 0;
             }
             timeout = setTimeout(function () {
+                if (!audioEnabled) return;
                 const randomIndex = Math.floor(Math.random() * RandomAudio.length);
                 const randomElement = RandomAudio[randomIndex];
                 playAudioVoice(randomElement);
