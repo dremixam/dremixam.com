@@ -63,7 +63,7 @@ loader.load('/leon.glb', function (gltf) {
     scene.add(gltf.scene);
 });
 
-const light = new THREE.DirectionalLight(0xffffff, 5);
+const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(-.5, .7, 1).normalize();
 scene.add(light);
 
