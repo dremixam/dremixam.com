@@ -35,12 +35,12 @@
             position: absolute;
             height: 100%;
             width: 100%;
-            z-index: 1000;
         }
 
         @media all and (orientation:landscape) {
             #col1 {
                 width: 40%;
+                height: 100vh;
             }
 
             #col2 {
@@ -66,8 +66,6 @@
         li {
             list-style-type: none;
         }
-
-
 
         #col2 {
             display: flex;
@@ -116,14 +114,25 @@
             filter: drop-shadow(5px 5px 5px #343744);
             transition: filter 0.1s ease-in-out;
         }
+
+        i#audioToggle {
+            position:fixed;
+            left: 1rem;
+            bottom: 1rem;
+            font-size: 4em;
+            cursor: pointer;
+        }
+        
+        i#audioToggle.bi-volume-mute-fill {
+            color:darkgray;
+        }
     </style>
 </head>
 
 <body>
-    <script type="module" src="/main.js"></script>
-
     <div class="box">
-        <div id="col1"></div>
+        <div id="col1">
+        </div>
         <div id="col2">
 
             <div class="content">
@@ -138,25 +147,28 @@
                 </p>
                 <ul class="list-group">
                     <li class="list-group-item">
-                        <a href="https://twitch.tv/dremixam"><i class="bi bi-twitch"></i> Twitch</a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="https://lou.lt/@dremixam"><i class="bi bi-mastodon"></i> Mastodon</a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="https://lou.lt/@dremixam"><i class="bi bi-instagram"></i> Instagram</a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="https://lou.lt/@dremixam"><i class="bi bi-youtube"></i> Youtube</a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="https://lou.lt/@dremixam"><i class="bi bi-tiktok"></i> Tik-Tok</a>
+                        <a href="https://twitch.dremixam.com/"><i class="bi bi-twitch"></i> Twitch</a>
                     </li>
                     <li class="list-group-item">
                         <a href="https://ko-fi.com/dremixam"><i class="bi bi-coin"></i> Me soutenir sur Ko-fi</a>
                     </li>
                     <li class="list-group-item">
-                        <a href="https://bigzbeul.com"><i class="bi bi-controller"></i> Le Bigzbeul</a>
+                        <a href="https://discord.dremixam.com/"><i class="bi bi-discord"></i> Discord</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="https://lou.lt/@dremixam"><i class="bi bi-mastodon"></i> Mastodon</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="https://www.instagram.com/dremixam/"><i class="bi bi-instagram"></i> Instagram</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="https://www.youtube.com/@DrEmixamTwitch"><i class="bi bi-youtube"></i> Youtube</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="https://www.tiktok.com/@dremixamtwitch?lang=fr"><i class="bi bi-tiktok"></i> Tik-Tok</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="https://bigzbeul.com"><i class="bi bi-box"></i> Le Bigzbeul</a>
                     </li>
                 </ul>
             </div>
@@ -165,6 +177,9 @@
         </div>
     </div>
 
+    <i id="audioToggle" class="bi bi-volume-mute-fill"></i>
+
+    <script type="module" src="/main.js"></script>
 </body>
 
 </html>

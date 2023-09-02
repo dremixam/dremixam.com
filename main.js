@@ -1,19 +1,36 @@
 import * as THREE from 'three';
-import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ClearPass } from 'three/addons/postprocessing/ClearPass.js';
 
+const container = document.getElementById("col1");
+var audioEnabled = false;
+var timeout;
+
+const WelcomeAudio = 'audio/1.ogg';
+const RandomAudio = ['audio/2.ogg', 'audio/3.ogg', 'audio/4.ogg', 'audio/5.ogg', 'audio/6.ogg', 'audio/7.ogg', 'audio/8.ogg', 'audio/9.ogg'];
+
 const clock = new THREE.Clock();
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(10 * window.innerHeight / window.innerWidth, window.innerWidth / window.innerHeight, 1500, 2500);
-camera.position.z = 1750;
+
+const textureLoader = new THREE.TextureLoader();
+const envmap = textureLoader.load('textures/workshop.jpg')
+scene.environment = envmap;
+
+const camera = new THREE.PerspectiveCamera(10, container.offsetWidth / container.offsetHeight, 10, 50);
+camera.position.z = 20;
+
+const horizontalFov = 10;
+
+camera.fov = (Math.atan(Math.tan(((horizontalFov / 2) * Math.PI) / 180) / camera.aspect) * 2 * 180) / Math.PI;
+camera.updateProjectionMatrix();
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 
 renderer.setClearColor(0xff585c72);
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(container.offsetWidth, container.offsetHeight);
 renderer.setAnimationLoop(animate);
 
 const composer = new EffectComposer(renderer);
@@ -21,32 +38,33 @@ const composer = new EffectComposer(renderer);
 composer.addPass(new ClearPass());
 composer.addPass(new RenderPass(scene, camera));
 
-document.body.appendChild(renderer.domElement);
+container.appendChild(renderer.domElement);
 
-const loader = new FBXLoader();
+const loader = new GLTFLoader();
 
 var leon;
-var leftFan, rightFan;
+var leftFan, rightFan, eye;
 var basePosition = { x: 0, y: 0, z: 0 };
-loader.load('/leon_animated.fbx', function (object) {
-    leon = object;
+var baseRotation = { x: .3, y: .4, z: 0 };
 
-    console.log(leon);
+loader.load('/leon.glb', function (gltf) {
 
-    leftFan = object.getObjectByName('FansLeft');
-    rightFan = object.getObjectByName('FansRight');
+    console.log(gltf);
 
-    console.log(window.innerWidth);
+    leon = gltf.scene.getObjectByName('Leon');
+    leftFan = gltf.scene.getObjectByName('FansLeft');
+    rightFan = gltf.scene.getObjectByName('FansRight');
+    eye = gltf.scene.getObjectByName('Eye');
 
-    basePosition.x = - 120;
-    basePosition.y = 50;
+    eye.material.emissive = new THREE.Color("hsl(203, 60%, 50%)");
+    eye.material.emissiveIntensity = 0;
 
-    resizeLeon();
 
-    leon.rotation.x = .3;
-    leon.rotation.y = 0.4;
 
-    scene.add(leon)
+
+
+
+    scene.add(gltf.scene);
 });
 
 const light = new THREE.DirectionalLight(0xffffff, 5);
@@ -57,40 +75,83 @@ scene.add(new THREE.AmbientLight(0xffffff, 1));
 
 function animate() {
     if (rightFan) {
-        rightFan.rotation.z += .3;
+        rightFan.rotation.y += .3;
     }
     if (leftFan) {
-        leftFan.rotation.z -= .3;
+        leftFan.rotation.y -= .3;
     }
     if (leon) {
-        leon.position.set(basePosition.x, basePosition.y + Math.sin(clock.getElapsedTime()) * 10, basePosition.z);
-        leon.rotation.set(.3 + Math.sin(clock.getElapsedTime() * 3) * 0.01, 0.4 + Math.sin(clock.getElapsedTime() * 2) * 0.01, Math.sin(clock.getElapsedTime() * 4) * 0.01);
+        leon.position.set(basePosition.x, basePosition.y + Math.sin(clock.getElapsedTime()) * .5, basePosition.z);
+        leon.rotation.set(baseRotation.x + Math.sin(clock.getElapsedTime() * 3) * 0.01, baseRotation.y + Math.sin(clock.getElapsedTime() * 2) * 0.01, baseRotation.z + Math.sin(clock.getElapsedTime() * 4) * 0.01);
     }
+
     composer.render();
 }
 
-function resizeLeon() {
-    if (leon) {
-        if (window.innerWidth > window.innerHeight) {
-            const scaleFactor = window.innerWidth * 0.0003;
-            leon.scale.set(scaleFactor, scaleFactor, scaleFactor);
-            basePosition.x = -100;
-            basePosition.y = 50;
-        } else {
-            const scaleFactor = window.innerWidth * 0.0018;
-            leon.scale.set(scaleFactor, scaleFactor, scaleFactor);
-            basePosition.x = 0;
-            basePosition.y = 100;
+window.onresize = function () {
+    camera.aspect = container.offsetWidth / container.offsetHeight;
+    camera.fov = (Math.atan(Math.tan(((horizontalFov / 2) * Math.PI) / 180) / camera.aspect) * 2 * 180) / Math.PI;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.offsetWidth, container.offsetHeight);
+};
+
+document.getElementById("audioToggle").addEventListener('click', function (event) {
+    var button = document.getElementById("audioToggle");
+    if (audioEnabled) {
+        button.classList.remove("bi-volume-up-fill");
+        button.classList.add("bi-volume-mute-fill");
+        if (timeout) clearTimeout(timeout);
+        audioEnabled = false;
+    } else {
+        button.classList.remove("bi-volume-mute-fill");
+        button.classList.add("bi-volume-up-fill");
+        audioEnabled = true;
+        playAudioVoice(WelcomeAudio);
+    }
+});
+
+function playAudioVoice(audioSrc) {
+    const audioContext = new AudioContext();
+    const audio = new Audio(audioSrc);
+    const source = audioContext.createMediaElementSource(audio);
+    const analyser = audioContext.createAnalyser();
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+    analyser.fftSize = 256;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    function displayVolume() {
+        analyser.getByteFrequencyData(dataArray);
+        const sum = dataArray.reduce((a, b) => a + b, 0);
+        const averageVolume = sum / bufferLength;
+
+        if (eye) {
+            eye.material.emissiveIntensity = averageVolume / 4;
+        }
+
+        if (audioEnabled && !audio.paused) {
+            requestAnimationFrame(displayVolume);
+        } else if (!audioEnabled && !audio.paused) {
+            audio.pause();
+            if (eye) {
+                eye.material.emissiveIntensity = 0;
+            }
+        } else if (audioEnabled && audio.paused) {
+            if (eye) {
+                eye.material.emissiveIntensity = 0;
+            }
+            timeout = setTimeout(function () {
+                const randomIndex = Math.floor(Math.random() * RandomAudio.length);
+                const randomElement = RandomAudio[randomIndex];
+                playAudioVoice(randomElement);
+            }, Math.floor(Math.random() * 10000) + 10000);
         }
     }
-}
 
-window.onresize = function () {
-    camera.fov = 10 * window.innerHeight / window.innerWidth;
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    resizeLeon();
-};
+    audio.play();
+
+    displayVolume();
+}
 
 animate();
