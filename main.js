@@ -23,15 +23,18 @@ const horizontalFov = 10;
 camera.fov = (Math.atan(Math.tan(((horizontalFov / 2) * Math.PI) / 180) / camera.aspect) * 2 * 180) / Math.PI;
 camera.updateProjectionMatrix();
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+const renderer = new THREE.WebGLRenderer({ 
+    antialias: true, 
+    powerPreference: "high-performance", 
+    alpha: true // Permet la transparence
+});
 
-renderer.setClearColor(0xff585c72);
+renderer.setClearColor(0x000000, 0); // Fond transparent
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(container.offsetWidth, container.offsetHeight);
 renderer.setAnimationLoop(animate);
 
 const composer = new EffectComposer(renderer);
-
 composer.addPass(new RenderPass(scene, camera));
 
 container.appendChild(renderer.domElement);
