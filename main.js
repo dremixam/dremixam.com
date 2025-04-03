@@ -72,18 +72,123 @@ scene.add(light);
 
 scene.add(new THREE.AmbientLight(0xffffff, 1));
 
-function animate() {
-    if (rightFan) {
-        rightFan.rotation.y = 20 * clock.elapsedTime;
-    }
-    if (leftFan) {
-        leftFan.rotation.y = -20 * clock.elapsedTime;
-    }
-    if (leon) {
-        leon.position.set(basePosition.x, basePosition.y + Math.sin(clock.getElapsedTime()) * .5, basePosition.z);
-        leon.rotation.set(baseRotation.x + Math.sin(clock.getElapsedTime() * 3) * 0.01, baseRotation.y + Math.sin(clock.getElapsedTime() * 2) * 0.01, baseRotation.z + Math.sin(clock.getElapsedTime() * 4) * 0.01);
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+window.addEventListener('click', (event) => {
+    if (!leon) return;
+
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObject(leon, true);
+
+    if (intersects.length > 0) {
+        bumpRobot(intersects[0].point); // Passe le point d'intersection à la fonction
+        
+        var button = document.getElementById("audioToggle");
+        if (!audioEnabled) {
+            button.classList.remove("bi-volume-mute-fill");
+            button.classList.add("bi-volume-up-fill");
+            audioEnabled = true;
+            playAudioVoice(WelcomeAudio);
+        }
     }
 
+
+});
+
+let oscillations = []; // Tableau pour stocker les oscillations
+
+function addOscillation(direction, intensity, duration, speed) {
+    oscillations.push({
+        direction, // { x, y, z } : direction de l'oscillation
+        intensity, // Intensité initiale de l'oscillation
+        duration, // Durée totale de l'oscillation
+        speed, // Vitesse de l'oscillation
+        elapsed: 0 // Temps écoulé pour cette oscillation
+    });
+}
+
+function bumpRobot(intersectPoint) {
+    if (!leon) return;
+
+    // Calculer la direction de la bousculade en fonction du point d'intersection
+    const localPoint = leon.worldToLocal(intersectPoint.clone());
+    const direction = {
+        x: localPoint.y * -0.5, // Plus le clic est haut/bas, plus la rotation en X est grande
+        y: localPoint.x * 0.5, // Plus le clic est à gauche/droite, plus la rotation en Y est grande
+        z: 0 // Pas de rotation sur l'axe Z pour cette bousculade
+    };
+
+    // Ajouter une oscillation de bousculade avec une vitesse aléatoire
+    const randomSpeed = Math.random() * 2 + 1; // Vitesse entre 1 et 3
+    const randomDuration = Math.random() * 3 + 4; // Durée entre 1 et 3 secondes
+    const randomIntensity = Math.random() * 2 + 2; // Intensité entre 1 et 3
+    addOscillation(direction, randomIntensity, randomDuration, randomSpeed); // Intensité 2, durée 3 secondes, vitesse aléatoire
+}
+
+function animate() {
+    const deltaTime = clock.getDelta(); // Temps écoulé depuis la dernière frame
+    const elapsedTime = clock.getElapsedTime(); // Temps total écoulé
+
+    // Animation des ventilateurs
+    if (rightFan) {
+        rightFan.rotation.y = 20 * elapsedTime;
+    }
+    if (leftFan) {
+        leftFan.rotation.y = -20 * elapsedTime;
+    }
+
+    // Animation de "léon"
+    if (leon) {
+        const oscillationX = Math.sin(elapsedTime * 3) * 0.01;
+        const oscillationY = Math.sin(elapsedTime * 2) * 0.01;
+        const oscillationZ = Math.sin(elapsedTime * 4) * 0.01;
+
+        // Ajouter l'oscillation normale
+        let totalRotation = {
+            x: baseRotation.x + oscillationX,
+            y: baseRotation.y + oscillationY,
+            z: baseRotation.z + oscillationZ
+        };
+
+        // Mettre à jour les oscillations
+        for (let i = oscillations.length - 1; i >= 0; i--) {
+            const osc = oscillations[i];
+            osc.elapsed += deltaTime; // Met à jour le temps écoulé
+
+            if (osc.elapsed > osc.duration) {
+                // Supprimer l'oscillation si elle a expiré
+                oscillations.splice(i, 1);
+                continue;
+            }
+
+            // Calculer l'intensité actuelle (décroît avec le temps)
+            const progress = osc.elapsed / osc.duration;
+            const currentIntensity = osc.intensity * (1 - progress); // Décroît linéairement
+
+            // Ajouter la contribution de cette oscillation
+            totalRotation.x += osc.direction.x * Math.sin(progress * Math.PI * 2 * osc.speed) * currentIntensity;
+            totalRotation.y += osc.direction.y * Math.sin(progress * Math.PI * 2 * osc.speed) * currentIntensity;
+            totalRotation.z += osc.direction.z * Math.sin(progress * Math.PI * 2 * osc.speed) * currentIntensity;
+        }
+
+        // Appliquer la rotation totale
+        leon.rotation.set(totalRotation.x, totalRotation.y, totalRotation.z);
+
+        // Oscillation de la position
+        leon.position.set(
+            basePosition.x,
+            basePosition.y + Math.sin(elapsedTime) * 0.5,
+            basePosition.z
+        );
+    }
+
+    // Rendu de la scène
     composer.render();
 }
 
@@ -157,4 +262,4 @@ function playAudioVoice(audioSrc) {
     displayVolume();
 }
 
-animate();
+//animate();
