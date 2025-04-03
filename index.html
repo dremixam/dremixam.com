@@ -63,6 +63,7 @@
             }
 
             #col2 {
+                margin-left: 40%;
                 width: 60%;
             }
         }
@@ -70,7 +71,11 @@
         @media all and (orientation:portrait) {
             .box>div {
                 width: 100%;
-                height: 50%;
+                height: 50vh;
+            }
+
+            #col2 {
+                margin-top: 30vh;
             }
         }
 
@@ -84,6 +89,13 @@
 
         li {
             list-style-type: none;
+        }
+
+        #col1 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
 
         #col2 {
@@ -219,15 +231,6 @@
             flex: 1;
         }
 
-        /* Effet de parallaxe pour la colonne gauche */
-        #col1 {
-            background: url('textures/workshop.hdr') no-repeat center center fixed;
-            background-size: cover;
-            filter: brightness(0.8);
-            transform: translateZ(0);
-            perspective: 1px;
-        }
-
         /* Animation pour le titre */
         h1 {
             animation: fadeIn 2s ease-in-out;
@@ -251,6 +254,7 @@
             /* Blanc légèrement bleuté */
             margin-bottom: 1em;
         }
+
     </style>
 </head>
 
