@@ -23,6 +23,7 @@
         body {
             margin: 0;
             height: 100%;
+            min-height: 100vh;
             width: 100%;
             color: white;
             font-family: 'Roboto', sans-serif;
@@ -202,11 +203,6 @@
             transition: transform 0.3s ease, color 0.3s ease;
         }
 
-        i:hover {
-            transform: rotate(15deg) scale(1.2);
-            color: #79608e;
-        }
-
         i#audioToggle {
             position: fixed;
             left: 1rem;
@@ -214,10 +210,28 @@
             font-size: 4em;
             cursor: pointer;
             z-index: 200;
+            color: #b792d6;
         }
 
         i#audioToggle.bi-volume-mute-fill {
-            color: darkgray;
+            color: #7b7381;
+        }
+
+        @media (hover: hover) {
+            i#audioToggle:hover,
+            i#audioToggle.bi-volume-mute-fill:hover {
+                transform: rotate(15deg) scale(1.2);
+                color: #79608e;
+            }
+        }
+
+        /* Désactiver :hover sur les écrans tactiles */
+        @media (hover: none) {
+            i#audioToggle:active,
+            i#audioToggle.bi-volume-mute-fill:active {
+                transform: rotate(15deg) scale(1.2);
+                color: #79608e;
+            }
         }
 
         /* Double liste */
@@ -254,7 +268,6 @@
             /* Blanc légèrement bleuté */
             margin-bottom: 1em;
         }
-
     </style>
 </head>
 
@@ -272,8 +285,7 @@
                     </video> DrEmixam</h1>
                 <p>
                     Bienvenue sur le site web de DrEmixam, célèbre streamer & hacker mondialement connu dans le
-                    quartier, sale islamogauchiste et personnalité de
-                    l'année 2006 du Time.
+                    quartier, sale islamogauchiste et personnalité de l'année 2006 du Time.
                 </p>
                 <p>
                     Mes créations n'engagent que ceux qui les croient.
