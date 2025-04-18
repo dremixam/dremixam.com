@@ -234,15 +234,27 @@
             }
         }
 
-        /* Double liste */
-        .double-ul {
+        /* Liste des projets avec disposition flexible */
+        .list-group.double-ul {
             display: flex;
-            align-items: stretch;
-            width: 100%;
+            flex-wrap: wrap; /* Permet de passer à la ligne si nécessaire */
+            gap: 1em; /* Espacement uniforme entre les éléments (horizontal et vertical) */
+            justify-content: center; /* Centre les éléments horizontalement */
+            padding: 0; /* Supprime les marges internes inutiles */
+            margin: 1em; /* Même marge verticale que les autres listes */
         }
 
-        .double-ul li {
-            flex: 1;
+        .list-group.double-ul .list-group-item {
+            flex: 1 1 calc(50% - 1em); /* Prend 50% de la largeur moins l'espacement */
+            box-sizing: border-box; /* Inclut les bordures et marges dans le calcul de la largeur */
+            text-align: center; /* Centre le texte dans chaque bouton */
+            margin: 0; /* Supprime les marges externes des items */
+        }
+
+        @media (max-width: 600px) {
+            .list-group.double-ul .list-group-item {
+                flex: 1 1 100%; /* Passe à une seule colonne sur les petits écrans */
+            }
         }
 
         /* Animation pour le titre */
