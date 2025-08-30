@@ -10,7 +10,7 @@ var timeout;
 var lastAudio = "";
 
 const WelcomeAudio = 'audio/welcome.ogg';
-const RandomAudio = ['audio/2.ogg', 'audio/3.ogg', 'audio/4.ogg', 'audio/5.ogg', 'audio/6.ogg', 'audio/7.ogg', 'audio/8.ogg', 'audio/9.ogg', 'audio/10.ogg', 'audio/10.ogg', 'audio/12.ogg', 'audio/13.ogg', 'audio/14.ogg', 'audio/15.ogg', 'audio/16.ogg', 'audio/17.ogg', 'audio/18.ogg', 'audio/19.ogg', 'audio/20.ogg', 'audio/21.ogg', 'audio/22.ogg', 'audio/23.ogg', 'audio/24.ogg', 'audio/25.ogg', 'audio/26.ogg', 'audio/27.ogg', 'audio/28.ogg', 'audio/29.ogg', 'audio/30.ogg'];
+const RandomAudio = ['audio/2.ogg', 'audio/3.ogg', 'audio/4.ogg', 'audio/5.ogg', 'audio/6.ogg', 'audio/7.ogg', 'audio/8.ogg', 'audio/9.ogg', 'audio/10.ogg', 'audio/10.ogg', 'audio/12.ogg', 'audio/13.ogg', 'audio/14.ogg', 'audio/15.ogg', 'audio/16.ogg', 'audio/17.ogg', 'audio/18.ogg', 'audio/19.ogg', 'audio/20.ogg', 'audio/21.ogg', 'audio/22.ogg', 'audio/23.ogg', 'audio/24.ogg', 'audio/25.ogg', 'audio/26.ogg', 'audio/27.ogg', 'audio/28.ogg', 'audio/29.ogg', 'audio/30.ogg', 'audio/31.ogg', 'audio/32.ogg', 'audio/33.ogg'];
 
 const clock = new THREE.Clock();
 const scene = new THREE.Scene();
@@ -23,9 +23,9 @@ const horizontalFov = 10;
 camera.fov = (Math.atan(Math.tan(((horizontalFov / 2) * Math.PI) / 180) / camera.aspect) * 2 * 180) / Math.PI;
 camera.updateProjectionMatrix();
 
-const renderer = new THREE.WebGLRenderer({ 
-    antialias: true, 
-    powerPreference: "high-performance", 
+const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    powerPreference: "high-performance",
     alpha: true // Permet la transparence
 });
 
@@ -88,7 +88,7 @@ window.addEventListener('click', (event) => {
 
     if (intersects.length > 0) {
         bumpRobot(intersects[0].point); // Passe le point d'intersection à la fonction
-        
+
         var button = document.getElementById("audioToggle");
         if (!audioEnabled) {
             button.classList.remove("bi-volume-mute-fill");
