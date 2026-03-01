@@ -21,54 +21,103 @@
     .col { background: rgba(40,36,60,0.85); border-radius: 8px; padding: 1.1em 1.2em; margin-bottom: 0.5em; box-shadow: 0 1px 4px #0003; }
     .col h2 { color: #a970ff; }
     .section { gap: 1.2rem; }
-    @media (max-width: 700px) { .bilingual { flex-direction: column; } }
+    /* Language toggle buttons */
+    .lang-toggle { display: flex; gap: 0.5rem; margin-bottom: 1.2rem; }
+    .lang-toggle button {
+      background: #2e2a45; color: #c7a6ff; border: 1.5px solid #5a3fa0;
+      border-radius: 6px; padding: 0.3em 1.1em; font-size: 1em; cursor: pointer;
+      font-weight: bold; transition: background 0.15s, color 0.15s;
+    }
+    .lang-toggle button.active, .lang-toggle button:hover {
+      background: #7c3aed; color: #fff; border-color: #a970ff;
+    }
+    .lang-header { gap: 2rem; margin-bottom: 0.5em; justify-content: space-between; }
+    /* Wide screens: hide toggle, show both columns */
+    @media (min-width: 701px) {
+      .lang-toggle { display: none; }
+      .lang-header { display: flex; }
+      .col.fr, .col.en { display: block; }
+    }
+    /* Narrow screens: show toggle, hide lang header, hide inactive lang */
+    @media (max-width: 700px) {
+      .lang-toggle { display: flex; }
+      .lang-header { display: none; }
+      .bilingual { flex-direction: column; }
+      .section { flex-direction: column; }
+      body.lang-fr .col.en { display: none; }
+      body.lang-en .col.fr { display: none; }
+      body.lang-fr .col.fr,
+      body.lang-en .col.en { flex: 1 1 100%; min-width: 0; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Politique de confidentialité / Privacy Policy</h1>
-    <div style="display: flex; gap: 2rem; margin-bottom: 0.5em; justify-content: space-between;">
+    <div class="lang-header">
       <div class="lang-title" style="flex:1 1 350px; min-width:300px; text-align:left;">FRANÇAIS</div>
       <div class="lang-title" style="flex:1 1 350px; min-width:300px; text-align:left;">ENGLISH</div>
     </div>
+    <div class="lang-toggle">
+      <button data-lang="fr">FR – Français</button>
+      <button data-lang="en">EN – English</button>
+    </div>
     <div class="bilingual">
       <div class="section">
-        <div class="col"><h2>Qui sommes-nous&nbsp;?</h2><p>L’extension «&nbsp;Léon le Robot&nbsp;» est éditée par DrEmixam (contact&nbsp;: contact@dremixam.com), responsable du traitement des données personnelles.</p></div>
-        <div class="col"><h2>Who are we?</h2><p>The “Léon le Robot” extension is operated by DrEmixam (contact: contact@dremixam.com), who is responsible for processing personal data.</p></div>
+        <div class="col fr"><h2>Qui sommes-nous&nbsp;?</h2><p>L’extension «&nbsp;Léon le Robot&nbsp;» est éditée par DrEmixam (contact&nbsp;: contact@dremixam.com), responsable du traitement des données personnelles.</p></div>
+        <div class="col en"><h2>Who are we?</h2><p>The “Léon le Robot” extension is operated by DrEmixam (contact: contact@dremixam.com), who is responsible for processing personal data.</p></div>
       </div>
       <div class="section">
-        <div class="col"><h2>Quelles données sont collectées&nbsp;?</h2><ul><li>Pseudonyme Twitch</li><li>Genre (si renseigné)</li><li>Préférences de prononciation du pseudo (si renseigné)</li><li>Date d’anniversaire (si renseignée)</li><li>Niveau de relation (indique à quel point Léon aime l’utilisateur ou non, purement fictif)</li><li>Lore (fiction écrite par DrEmixam à propos de l’utilisateur)</li><li>Nombre de messages envoyés</li></ul><p>Aucune donnée sensible n’est collectée. Certaines données (pseudo, genre, niveau de relation, lore) peuvent être utilisées pour générer des réponses via des API d’IA (LLM), mais jamais à des fins commerciales ou publicitaires.</p></div>
-        <div class="col"><h2>What data is collected?</h2><ul><li>Twitch username</li><li>Gender (if provided)</li><li>Username pronunciation preferences (if provided)</li><li>Birthday (if provided)</li><li>Relationship level (shows how much Léon “likes” the user or not, purely fictional)</li><li>Lore (fictional story written by DrEmixam about the user)</li><li>Message count</li></ul><p>No sensitive data is collected. Some data (username, gender, relationship level, lore) may be used to generate responses via AI APIs (LLM), but never for commercial or advertising purposes.</p></div>
+        <div class="col fr"><h2>Quelles données sont collectées&nbsp;?</h2><ul><li>Pseudonyme Twitch</li><li>Genre (si renseigné)</li><li>Préférences de prononciation du pseudo (si renseigné)</li><li>Date d’anniversaire (si renseignée)</li><li>Niveau de relation (indique à quel point Léon aime l’utilisateur ou non, purement fictif)</li><li>Lore (fiction écrite par DrEmixam à propos de l’utilisateur)</li><li>Nombre de messages envoyés</li></ul><p>Aucune donnée sensible n’est collectée. Certaines données (pseudo, genre, niveau de relation, lore) peuvent être utilisées pour générer des réponses via des API d’IA (LLM), mais jamais à des fins commerciales ou publicitaires.</p></div>
+        <div class="col en"><h2>What data is collected?</h2><ul><li>Twitch username</li><li>Gender (if provided)</li><li>Username pronunciation preferences (if provided)</li><li>Birthday (if provided)</li><li>Relationship level (shows how much Léon “likes” the user or not, purely fictional)</li><li>Lore (fictional story written by DrEmixam about the user)</li><li>Message count</li></ul><p>No sensitive data is collected. Some data (username, gender, relationship level, lore) may be used to generate responses via AI APIs (LLM), but never for commercial or advertising purposes.</p></div>
       </div>
       <div class="section">
-        <div class="col"><h2>Finalité de la collecte</h2><p>Les données servent uniquement à personnaliser l’interaction avec le robot Léon et à améliorer l’expérience sur le stream.</p></div>
-        <div class="col"><h2>Purpose of data collection</h2><p>Data is used solely to personalize interaction with Léon the Robot and enhance the stream experience.</p></div>
+        <div class="col fr"><h2>Finalité de la collecte</h2><p>Les données servent uniquement à personnaliser l’interaction avec le robot Léon et à améliorer l’expérience sur le stream.</p></div>
+        <div class="col en"><h2>Purpose of data collection</h2><p>Data is used solely to personalize interaction with Léon the Robot and enhance the stream experience.</p></div>
       </div>
       <div class="section">
-        <div class="col"><h2>Base légale</h2><p>Le traitement repose sur l’intérêt légitime du streamer à animer sa communauté et sur le consentement de l’utilisateur via Twitch.</p></div>
-        <div class="col"><h2>Legal basis</h2><p>Processing is based on the streamer’s legitimate interest in animating the community and on the user’s consent via Twitch.</p></div>
+        <div class="col fr"><h2>Base légale</h2><p>Le traitement repose sur l’intérêt légitime du streamer à animer sa communauté et sur le consentement de l’utilisateur via Twitch.</p></div>
+        <div class="col en"><h2>Legal basis</h2><p>Processing is based on the streamer’s legitimate interest in animating the community and on the user’s consent via Twitch.</p></div>
       </div>
       <div class="section">
-        <div class="col"><h2>Durée de conservation</h2><p>Les données sont conservées pour la durée maximale autorisée par la législation en vigueur, ou jusqu’à demande de suppression par l’utilisateur.</p></div>
-        <div class="col"><h2>Data retention</h2><p>Data is kept for the maximum period allowed by law, or until deletion is requested by the user.</p></div>
+        <div class="col fr"><h2>Durée de conservation</h2><p>Les données sont conservées pour la durée maximale autorisée par la législation en vigueur, ou jusqu’à demande de suppression par l’utilisateur.</p></div>
+        <div class="col en"><h2>Data retention</h2><p>Data is kept for the maximum period allowed by law, or until deletion is requested by the user.</p></div>
       </div>
       <div class="section">
-        <div class="col"><h2>Vos droits</h2><p>Vous pouvez demander l’accès, la rectification ou la suppression de vos données à tout moment en écrivant à&nbsp;: contact@dremixam.com</p></div>
-        <div class="col"><h2>Your rights</h2><p>You may request access, correction, or deletion of your data at any time by writing to: contact@dremixam.com</p></div>
+        <div class="col fr"><h2>Vos droits</h2><p>Vous pouvez demander l’accès, la rectification ou la suppression de vos données à tout moment en écrivant à&nbsp;: contact@dremixam.com</p></div>
+        <div class="col en"><h2>Your rights</h2><p>You may request access, correction, or deletion of your data at any time by writing to: contact@dremixam.com</p></div>
       </div>
       <div class="section">
-        <div class="col"><h2>Sécurité</h2><ul><li>Accès restreint au serveur (authentification forte, accès unique à DrEmixam)</li><li>API protégée par authentification</li><li>Chiffrement des communications (HTTPS, TLS, SSH)</li><li>Sauvegardes chiffrées et sécurisées</li><li>Serveur et logiciels à jour</li><li>Monitoring quotidien des accès</li></ul></div>
-        <div class="col"><h2>Security</h2><ul><li>Restricted server access (strong authentication, only DrEmixam has access)</li><li>API protected by authentication</li><li>Encrypted communications (HTTPS, TLS, SSH)</li><li>Encrypted and secure backups</li><li>Up-to-date server and software</li><li>Daily access monitoring</li></ul></div>
+        <div class="col fr"><h2>Sécurité</h2><ul><li>Accès restreint au serveur (authentification forte, accès unique à DrEmixam)</li><li>API protégée par authentification</li><li>Chiffrement des communications (HTTPS, TLS, SSH)</li><li>Sauvegardes chiffrées et sécurisées</li><li>Serveur et logiciels à jour</li><li>Monitoring quotidien des accès</li></ul></div>
+        <div class="col en"><h2>Security</h2><ul><li>Restricted server access (strong authentication, only DrEmixam has access)</li><li>API protected by authentication</li><li>Encrypted communications (HTTPS, TLS, SSH)</li><li>Encrypted and secure backups</li><li>Up-to-date server and software</li><li>Daily access monitoring</li></ul></div>
       </div>
       <div class="section">
-        <div class="col"><h2>Hébergement et sous-traitance</h2><p>Les données sont hébergées en Union Européenne sur un serveur dédié loué auprès d’OVH (France). Aucun transfert hors UE.<br>Des API d’intelligence artificielle (LLM) peuvent être utilisées pour générer des réponses personnalisées à partir de certaines données (pseudonyme, genre, niveau de relation). Ces traitements sont réalisés auprès de prestataires externes et uniquement dans le cadre de l’interaction avec le robot Léon.</p></div>
-        <div class="col"><h2>Hosting and subcontracting</h2><p>Data is hosted in the European Union on a dedicated server rented from OVH (France). No transfer outside the EU.<br>AI APIs (LLM) may be used to generate personalized responses from some data (username, pronouns, relationship level). These operations are performed by external providers and only for the purpose of interaction with Léon the Robot.</p></div>
+        <div class="col fr"><h2>Hébergement et sous-traitance</h2><p>Les données sont hébergées en Union Européenne sur un serveur dédié loué auprès d’OVH (France). Aucun transfert hors UE.<br>Des API d’intelligence artificielle (LLM) peuvent être utilisées pour générer des réponses personnalisées à partir de certaines données (pseudonyme, genre, niveau de relation). Ces traitements sont réalisés auprès de prestataires externes et uniquement dans le cadre de l’interaction avec le robot Léon.</p></div>
+        <div class="col en"><h2>Hosting and subcontracting</h2><p>Data is hosted in the European Union on a dedicated server rented from OVH (France). No transfer outside the EU.<br>AI APIs (LLM) may be used to generate personalized responses from some data (username, pronouns, relationship level). These operations are performed by external providers and only for the purpose of interaction with Léon the Robot.</p></div>
       </div>
       <div class="section">
-        <div class="col"><h2>Contact</h2><p>Pour toute question ou exercice de vos droits RGPD&nbsp;: contact@dremixam.com</p></div>
-        <div class="col"><h2>Contact</h2><p>For any question or to exercise your GDPR rights: contact@dremixam.com</p></div>
+        <div class="col fr"><h2>Contact</h2><p>Pour toute question ou exercice de vos droits RGPD&nbsp;: contact@dremixam.com</p></div>
+        <div class="col en"><h2>Contact</h2><p>For any question or to exercise your GDPR rights: contact@dremixam.com</p></div>
       </div>
     </div>
   </div>
+<script>
+  (function () {
+    function setLang(lang) {
+      document.body.classList.remove('lang-fr', 'lang-en');
+      document.body.classList.add('lang-' + lang);
+      document.querySelectorAll('.lang-toggle button').forEach(function (b) {
+        b.classList.toggle('active', b.dataset.lang === lang);
+      });
+      try { localStorage.setItem('pp_lang', lang); } catch (e) {}
+    }
+    document.querySelectorAll('.lang-toggle button').forEach(function (b) {
+      b.addEventListener('click', function () { setLang(b.dataset.lang); });
+    });
+    var saved = 'fr';
+    try { saved = localStorage.getItem('pp_lang') || 'fr'; } catch (e) {}
+    setLang(saved);
+  })();
+</script>
 </body>
 </html>
