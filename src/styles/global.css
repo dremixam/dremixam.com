@@ -166,7 +166,7 @@ h1.logo img:hover { transform: scale(1.04) rotate(-2deg); }
 
 .links a:hover, .support:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--plum); }
 .links a:active, .support:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--plum); }
-.links a.primary { background: var(--teal); }
+.links a.primary { background: var(--teal); color: var(--cream);}
 
 .links .icon, .support .icon {
     flex: none;
