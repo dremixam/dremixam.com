@@ -329,33 +329,49 @@ h1.logo img:hover { transform: scale(1.04) rotate(-2deg); }
     box-shadow: 3px 3px 0 var(--plum);
     font-family: var(--font-body);
     cursor: pointer;
-    transition: transform 0.12s, box-shadow 0.12s, background 0.12s, padding 0.25s;
+    transition: transform 0.12s, box-shadow 0.12s, background 0.4s ease, padding 0.3s ease;
 }
 
 #audioToggle::before { font-size: var(--icon-size); }
 
+/* La colonne passe de 0fr à 1fr : l'allongement s'arrête pile à la largeur du texte. */
 #audioToggle .audio-label {
-    max-width: 0;
-    overflow: hidden;
-    white-space: nowrap;
+    display: grid;
+    grid-template-columns: 0fr;
     font-size: 0.95rem;
     font-weight: 800;
-    transition: max-width 0.25s, margin 0.25s;
+    transition: grid-template-columns 0.3s ease, margin 0.3s ease;
+}
+
+#audioToggle .audio-label-inner {
+    min-width: 0;
+    overflow: hidden;
+    display: grid;
+}
+
+/* Les deux libellés sont superposés : la largeur ne change pas quand on bascule. */
+#audioToggle .audio-label-inner > span {
+    grid-area: 1 / 1;
+    white-space: nowrap;
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
 }
 
 #audioToggle.bi-volume-mute-fill .when-playing,
-#audioToggle.bi-volume-up-fill .when-muted { display: none; }
+#audioToggle.bi-volume-up-fill .when-muted {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(0.5em);
+}
 
 #audioToggle:focus-visible { padding-right: 1rem; }
-#audioToggle:focus-visible .audio-label { max-width: 12rem; margin-left: 0.5rem; }
+#audioToggle:focus-visible .audio-label { grid-template-columns: 1fr; margin-left: 0.5rem; }
 
 @media (hover: hover) {
     #audioToggle:hover { padding-right: 1rem; }
-    #audioToggle:hover .audio-label { max-width: 12rem; margin-left: 0.5rem; }
+    #audioToggle:hover .audio-label { grid-template-columns: 1fr; margin-left: 0.5rem; }
 }
 
 #audioToggle.bi-volume-mute-fill { background: var(--cream); }
-#audioToggle:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--plum); }
 #audioToggle:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--plum); }
 
 /* === Blog === */
