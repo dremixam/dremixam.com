@@ -1,0 +1,134 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Section blog masquée le temps de finir le blog.
+const showBlog = false;
+
+const [latestPost] = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+    (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf()
+);
+---
+
+<BaseLayout title="Le Laboratoire du Dr Emixam" description="Le site de DrEmixam : liens, projets et Léon le robot.">
+    <div class="box">
+        <div id="col1"></div>
+        <div id="col2">
+            <div class="content">
+                <h1 class="logo">
+                    <img src="/logo.svg" alt="Le Laboratoire du Dr Emixam" width="669" height="650" />
+                </h1>
+                <p class="intro">
+                    Bienvenue sur le site web de DrEmixam, célèbre streamer & hacker mondialement connu dans le
+                    quartier, islamogauchiste et personnalité de l'année 2006 du Time.
+                </p>
+                <p class="intro">Mes créations n'engagent que ceux qui les croient.</p>
+
+                <ul class="links">
+                    <li class="wide"><a class="primary" target="_blank" href="https://twitch.dremixam.com/"><i class="icon bi bi-twitch"></i><span class="txt">Twitch</span></a></li>
+                    <li><a target="_blank" href="https://discord.dremixam.com/"><i class="icon bi bi-discord"></i><span class="txt">Discord</span></a></li>
+                    <li>
+                        <a target="_blank" href="https://bsky.app/profile/dremixam.com">
+                            <span class="icon">
+                                <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17,12.28l-.42,0ZM12,9.46a26.84,26.84,0,0,0-6.8-8C2.57-.39,1.56-.07.9.23S0,1.75,0,2.43A62.64,62.64,0,0,0,.62,8.91c.82,2.74,3.72,3.67,6.39,3.37l.41-.06L7,12.28c-3.91.58-7.39,2-2.83,7.08,5,5.19,6.87-1.12,7.82-4.31.95,3.19,2.05,9.27,7.73,4.31C24,15.05,20.9,12.86,17,12.28l-.42-.06.42.06c2.67.29,5.57-.63,6.39-3.37A62.38,62.38,0,0,0,24,2.43c0-.69-.14-1.86-.9-2.2s-1.67-.62-4.3,1.24A26.84,26.84,0,0,0,12,9.46Z" /></svg>
+                            </span><span class="txt">Bluesky</span>
+                        </a>
+                    </li>
+                    <li><a target="_blank" href="https://shop.dremixam.com/"><i class="icon bi bi-shop"></i><span class="txt">La boutique</span></a></li>
+                    <li>
+                        <a target="_blank" href="https://onlyfans.com/leonlerobot">
+                            <span class="icon">
+                                <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 4.003h-4.015c-3.45 0-5.3.197-6.748 1.957a7.996 7.996 0 1 0 2.103 9.211c3.182-.231 5.39-2.134 6.085-5.173 0 0-2.399.585-4.43 0 4.018-.777 6.333-3.037 7.005-5.995zM5.61 11.999A2.391 2.391 0 0 1 9.28 9.97a2.966 2.966 0 0 1 2.998-2.528h.008c-.92 1.778-1.407 3.352-1.998 5.263A2.392 2.392 0 0 1 5.61 12Zm2.386-7.996a7.996 7.996 0 1 0 7.996 7.996 7.996 7.996 0 0 0-7.996-7.996Zm0 10.394A2.399 2.399 0 1 1 10.395 12a2.396 2.396 0 0 1-2.399 2.398Z" /></svg>
+                            </span><span class="txt">OnlyFans de Léon</span>
+                        </a>
+                    </li>
+                    <li><a target="_blank" href="https://www.tiktok.com/@dremixamtwitch?lang=fr"><i class="icon bi bi-tiktok"></i><span class="txt">TikTok</span></a></li>
+                    <li><a target="_blank" href="https://www.youtube.com/@DrEmixamTwitch" title="Replays et clips"><i class="icon bi bi-youtube"></i><span class="txt">YouTube</span></a></li>
+                </ul>
+
+                {showBlog && latestPost && (
+                    <>
+                        <h2 class="label">Le blog</h2>
+                        <a class="post-card" href={`/blog/${latestPost.id}/`}>
+                            <span class="stamp">Nouveau</span>
+                            <small>
+                                {latestPost.data.publishDate.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            </small>
+                            <strong>{latestPost.data.title}</strong>
+                            <p>{latestPost.data.description}</p>
+                        </a>
+                        <a class="more-link" href="/blog/">Tous les articles</a>
+                    </>
+                )}
+
+                <h2 class="label">Projets</h2>
+                <ul class="tiles">
+                    <li><a target="_blank" href="https://modrinth.com/user/DrEmixam"><i class="bi bi-box"></i>Mods Minecraft</a></li>
+                    <li><a target="_blank" href="https://liberty-tree.net"><i class="bi bi-tree"></i>Le Liberty-Tree</a></li>
+                    <li><a target="_blank" href="https://github.com/dremixam/RAGEPhotoManager"><i class="bi bi-camera"></i>RAGE Photo Manager</a></li>
+                    <li><a target="_blank" href="https://github.com/dremixam/ACVoice"><i class="bi bi-chat-dots"></i>Animal Crossing Voice</a></li>
+                    <li><a target="_blank" href="https://purplesky.dremixam.com/"><i class="bi bi-broadcast"></i>PurpleSky</a></li>
+                    <li><a target="_blank" href="/files/leon.stl"><i class="bi bi-printer"></i>Modèle 3D de Léon à imprimer</a></li>
+                    <li><a target="_blank" href="/files/calendrier-doigt-dans-le-cul.pdf"><i class="bi bi-calendar-date"></i>Le calendrier de Léon (2024)</a></li>
+                </ul>
+
+                <h2 class="label">Contact</h2>
+                <ul class="tiles">
+                    <li><a target="_blank" href="mailto:?to=DrEmixam%20%3ccontact@dremixam.com%3e"><i class="bi bi-envelope-fill"></i>contact&#x200B;@dremixam.com</a></li>
+                    <li><a class="copy" title="Pseudo Discord"><i class="bi bi-discord"></i>DrEmixam</a></li>
+                </ul>
+
+                <a class="support" target="_blank" href="https://ko-fi.com/dremixam"><i class="icon bi bi-cup-hot-fill"></i><span class="txt">Me soutenir sur Ko-fi</span></a>
+
+                <a id="status-indicator" href="https://status.dremixam.com/" target="_blank">
+                    <span class="dot"></span>
+                    <span id="status-text">Chargement...</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <button id="audioToggle" type="button" class="bi bi-volume-mute-fill" aria-label="Activer ou couper la voix de Léon"></button>
+
+    <script>
+        import { initLeon } from '../scripts/leon';
+
+        const container = document.getElementById('col1');
+        const audioToggle = document.getElementById('audioToggle');
+        if (container && audioToggle) {
+            initLeon(container, audioToggle);
+        }
+    </script>
+
+    <script>
+        (async function () {
+            const indicator = document.getElementById('status-indicator');
+            const text = document.getElementById('status-text');
+            if (!indicator || !text) return;
+            try {
+                const url = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://status.dremixam.com/fr/badge');
+                const res = await fetch(url);
+                const json = await res.json();
+                const html = json.contents;
+                const colorMatch = html.match(/text-statuspage-(\w+)/);
+                const color = colorMatch ? colorMatch[1] : null;
+                const textMatch = html.match(/<div[^>]*>\s*([^<]+)\s*<\/div>\s*<\/a>/);
+                const statusText = textMatch ? textMatch[1].trim() : null;
+                if (color === 'green') {
+                    indicator.classList.add('operational');
+                    text.textContent = statusText || 'Tous les services sont opérationnels';
+                } else if (color === 'yellow' || color === 'orange') {
+                    indicator.classList.add('degraded');
+                    text.textContent = statusText || 'Perturbation en cours';
+                } else if (color === 'red') {
+                    indicator.classList.add('downtime');
+                    text.textContent = statusText || 'Panne en cours';
+                } else {
+                    text.textContent = 'État des services';
+                }
+            } catch (e) {
+                text.textContent = 'État des services';
+            }
+        })();
+    </script>
+</BaseLayout>

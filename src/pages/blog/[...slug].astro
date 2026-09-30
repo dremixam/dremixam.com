@@ -1,0 +1,38 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+    const posts = await getCollection('blog', ({ data }) => !data.draft);
+    return posts.map((post) => ({
+        params: { slug: post.id },
+        props: { post },
+    }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<BaseLayout title={`${post.data.title} — Le Laboratoire du Dr Emixam`} description={post.data.description}>
+    <main class="blog-page">
+        <a class="site-header" href="/blog/">
+            <img src="/logo.svg" alt="" width="669" height="650" />
+            <span class="txt">Tous les articles</span>
+        </a>
+        <article class="article">
+            <header>
+                <h1>{post.data.title}</h1>
+                <time datetime={post.data.publishDate.toISOString()}>
+                    {post.data.publishDate.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </time>
+                {post.data.tags.length > 0 && (
+                    <div class="post-tags">
+                        {post.data.tags.map((tag) => <span class="post-tag">{tag}</span>)}
+                    </div>
+                )}
+            </header>
+            <Content />
+        </article>
+    </main>
+</BaseLayout>
