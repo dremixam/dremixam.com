@@ -1,6 +1,7 @@
 /* === Tokens : piste « Autocollant », reprise du logo de la chaîne === */
 :root {
     --brand-purple: #6451a3;
+    --brand-purple-dark: #4F2C81;
     --plum: #48274b;
     --orange: #f7b867;
     --teal: #19b0c1;
@@ -166,7 +167,11 @@ h1.logo img:hover { transform: scale(1.04) rotate(-2deg); }
 
 .links a:hover, .support:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--plum); }
 .links a:active, .support:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--plum); }
-.links a.primary { background: var(--teal); color: var(--cream);}
+
+
+.links a.primary { background: var(--brand-purple-dark); color: var(--cream);}
+.links a.primary:hover { background: var(--brand-purple-dark); color: var(--cream);}
+.links a.primary:active { background: var(--brand-purple-dark); color: var(--cream);}
 
 .links .icon, .support .icon {
     flex: none;
