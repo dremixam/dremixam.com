@@ -88,7 +88,9 @@ const [latestPost] = (await getCollection('blog', ({ data }) => !data.draft)).so
         </div>
     </div>
 
-    <button id="audioToggle" type="button" class="bi bi-volume-mute-fill" aria-label="Activer ou couper la voix de Léon"></button>
+    <button id="audioToggle" type="button" class="bi bi-volume-mute-fill">
+        <span class="audio-label"><span class="when-muted">Activer le son</span><span class="when-playing">Désactiver le son</span></span>
+    </button>
 
     <script>
         import { initLeon } from '../scripts/leon';

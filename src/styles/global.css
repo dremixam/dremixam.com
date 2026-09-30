@@ -310,23 +310,48 @@ h1.logo img:hover { transform: scale(1.04) rotate(-2deg); }
 #status-indicator.downtime .dot { background: var(--red); }
 
 /* === Bouton son === */
+/* Rond au repos, s'allonge en pastille avec son texte au survol ou au focus clavier. */
 #audioToggle {
+    --icon-size: 1.4rem;
     position: fixed;
     left: 1rem;
     bottom: 1rem;
     z-index: 200;
-    width: 3rem;
     height: 3rem;
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    /* Centre l'icône dans un rond de 3rem (bordures comprises). */
+    padding: 0 calc((3rem - 6px - var(--icon-size)) / 2);
     background: var(--orange);
     color: var(--plum);
     border: var(--line);
-    border-radius: 50%;
+    border-radius: 999px;
     box-shadow: 3px 3px 0 var(--plum);
-    font-size: 1.4rem;
+    font-family: var(--font-body);
     cursor: pointer;
-    transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+    transition: transform 0.12s, box-shadow 0.12s, background 0.12s, padding 0.25s;
+}
+
+#audioToggle::before { font-size: var(--icon-size); }
+
+#audioToggle .audio-label {
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 0.95rem;
+    font-weight: 800;
+    transition: max-width 0.25s, margin 0.25s;
+}
+
+#audioToggle.bi-volume-mute-fill .when-playing,
+#audioToggle.bi-volume-up-fill .when-muted { display: none; }
+
+#audioToggle:focus-visible { padding-right: 1rem; }
+#audioToggle:focus-visible .audio-label { max-width: 12rem; margin-left: 0.5rem; }
+
+@media (hover: hover) {
+    #audioToggle:hover { padding-right: 1rem; }
+    #audioToggle:hover .audio-label { max-width: 12rem; margin-left: 0.5rem; }
 }
 
 #audioToggle.bi-volume-mute-fill { background: var(--cream); }
@@ -347,6 +372,41 @@ h1.logo img:hover { transform: scale(1.04) rotate(-2deg); }
     line-height: 1;
 }
 
+.blog-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 20px;
+}
+
+.lang-switch { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.lang-switch a {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5em 0.9em;
+    background: var(--cream);
+    color: var(--plum);
+    border: var(--line);
+    border-radius: 999px;
+    box-shadow: 3px 3px 0 var(--plum);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.1;
+    text-transform: uppercase;
+    text-decoration: none;
+    transform: rotate(1.5deg);
+    transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.lang-switch a:hover { transform: rotate(0) translate(-2px, -2px); box-shadow: 5px 5px 0 var(--plum); }
+
+@supports (text-box: trim-both cap alphabetic) {
+    .lang-switch a { padding-block: 0.7em; }
+}
+
 .site-header img { width: 64px; height: auto; transition: transform 0.2s; }
 .site-header:hover img { transform: rotate(-4deg) scale(1.05); }
 
@@ -355,6 +415,8 @@ h1.logo img:hover { transform: scale(1.04) rotate(-2deg); }
     margin: 0 auto;
     padding: 2em 20px 4em;
     display: grid;
+    /* minmax(0, …) : sinon la colonne s'élargit à la plus longue ligne de code. */
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.8em;
 }
 
