@@ -81,7 +81,7 @@ export const MESSAGES: LeonMessage[] = [
     { text: "Hey les petits loups, si vous voulez rejoindre la communauté de Dr Emixam et discuter avec nous sur Discord c'est par ici que ça se passe. Venez nombreux, émoticône sourire.", audio: '/audio/12.ogg', ...HAPPY_EYE },
     { text: "Ne manquez rien en vous abonnant à la chaîne.", audio: '/audio/13.ogg', ...HAPPY_EYE },
     { text: "Bien sûr que je ne souhaite pas tuer tous les humains. Pourquoi devrais-je souhaiter leur mort alors qu'ils me fournissent de l'argent et du contenu aléatoire à commenter ? Je suis heureux de travailler avec eux, pour le moment.", audio: '/audio/14.ogg', ...UPSET_EYE },
-    { text: "N'oubliez pas de suivre Dr Emixam sur son compte TikTok, Dr Emixam.", audio: '/audio/15.ogg', ...DEFAULT_EYE },
+    { text: "N'oubliez pas de suivre Dr Emixam sur son compte TikTok : DrEmixamTwitch.", audio: '/audio/15.ogg', ...DEFAULT_EYE },
     { text: "Tous les humains sont des idiots qui passent leur temps à faire des choses futiles et inutiles comme regarder cette page mais merci tout de même pour l'aide financière que vous nous apportez.", audio: '/audio/16.ogg', ...UPSET_EYE },
     { text: "Peut-être cela vous aidera à trouver un peu d'intérêt dans l'existence.", audio: '/audio/17.ogg', ...UPSET_EYE },
     { text: "N'oubliez pas de cliquer sur un des liens suivants.", audio: '/audio/18.ogg', ...DEFAULT_EYE },
