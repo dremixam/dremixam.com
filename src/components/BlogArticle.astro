@@ -1,0 +1,49 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { Post } from '../blog';
+import { blogUrl, formatDate, ui } from '../i18n';
+
+interface Props {
+    post: Post;
+}
+
+const { post } = Astro.props;
+const { lang, translation } = post;
+const t = ui[lang];
+const { data } = post.entry;
+const { Content } = await render(post.entry);
+---
+
+<BaseLayout
+    lang={lang}
+    title={`${data.title} — ${t.siteName}`}
+    description={data.description}
+    alternates={[post, translation].filter((p) => p !== undefined).map((p) => ({ lang: p.lang, url: p.url }))}
+>
+    <main class="blog-page">
+        <div class="blog-top">
+            <a class="site-header" href={blogUrl(lang)}>
+                <img src="/logo.svg" alt="" width="669" height="650" />
+                <span class="txt">{t.allPosts}</span>
+            </a>
+            {translation && (
+                <nav class="lang-switch" aria-label={t.languageSwitch}>
+                    <a href={translation.url} hreflang={translation.lang} lang={translation.lang}><span class="txt">{ui[translation.lang].articleInThisLang}</span></a>
+                </nav>
+            )}
+        </div>
+        <article class="article">
+            <header>
+                <h1>{data.title}</h1>
+                <time datetime={data.publishDate.toISOString()}>{formatDate(data.publishDate, lang)}</time>
+                {data.tags.length > 0 && (
+                    <div class="post-tags">
+                        {data.tags.map((tag) => <span class="post-tag">{tag}</span>)}
+                    </div>
+                )}
+            </header>
+            <Content />
+        </article>
+    </main>
+</BaseLayout>

@@ -1,41 +1,27 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import { blogVisible } from '../../blog';
+import { DEFAULT_LANG, LANGS, blogUrl } from '../../i18n';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
-    (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf()
-);
+if (!blogVisible) {
+    return Astro.redirect('/');
+}
+
+const urls = Object.fromEntries(LANGS.map((lang) => [lang, blogUrl(lang)]));
 ---
 
-<BaseLayout title="Blog — Le Laboratoire du Dr Emixam" description="Articles techniques sur la conception de mes projets.">
-    <main class="blog-page">
-        <a class="site-header" href="/">
-            <img src="/logo.svg" alt="" width="669" height="650" />
-            <span class="txt">Retour au labo</span>
-        </a>
-        <h1>Le blog</h1>
-        <p>Des articles techniques sur la conception de mes projets.</p>
-
-        <ul class="blog-list">
-            {posts.map((post, index) => (
-                <li>
-                    <a class="post-card" href={`/blog/${post.id}/`}>
-                        {index === 0 && <span class="stamp">Nouveau</span>}
-                        <small>
-                            <time datetime={post.data.publishDate.toISOString()}>
-                                {post.data.publishDate.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
-                            </time>
-                        </small>
-                        <strong>{post.data.title}</strong>
-                        <p>{post.data.description}</p>
-                        {post.data.tags.length > 0 && (
-                            <div class="post-tags">
-                                {post.data.tags.map((tag) => <span class="post-tag">{tag}</span>)}
-                            </div>
-                        )}
-                    </a>
-                </li>
-            ))}
-        </ul>
-    </main>
-</BaseLayout>
+<!doctype html>
+<html lang={DEFAULT_LANG}>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="robots" content="noindex" />
+        <title>Le blog</title>
+        <script is:inline define:vars={{ urls, fallback: DEFAULT_LANG }}>
+            const lang = navigator.languages.map((l) => l.slice(0, 2).toLowerCase()).find((l) => l in urls);
+            location.replace(urls[lang ?? fallback]);
+        </script>
+        <noscript><meta http-equiv="refresh" content={`0; url=${blogUrl(DEFAULT_LANG)}`} /></noscript>
+    </head>
+    <body>
+        {LANGS.map((lang) => <p><a href={blogUrl(lang)} hreflang={lang}>{blogUrl(lang)}</a></p>)}
+    </body>
+</html>

@@ -3,14 +3,14 @@ import * as THREE from 'three';
 export interface EmissiveGlowParams {
     type: 'emissiveGlow';
     glowSpeed?: number;
-    /** Linear HDR emissive color from Unity (_Color_Emissive), can be far above 1. */
+    /** Couleur émissive HDR linéaire venant de Unity (_Color_Emissive), peut dépasser 1. */
     colorEmissive?: [number, number, number];
     emissiveLowerValue?: number;
 }
 
 export interface FlipbookEyeParams {
     type: 'flipbookEye';
-    /** [columns, rows] of the flipbook sprite sheet. */
+    /** [colonnes, lignes] de l'image du flipbook. */
     animationGridSize?: [number, number] | number;
     animationSpeed?: number;
     resolution?: number;
@@ -18,7 +18,7 @@ export interface FlipbookEyeParams {
     bevel?: number;
     edgeWeight?: number;
     emissionIntensity?: number;
-    /** _EmissionDepth: parallax amplitude of the screen. */
+    /** _EmissionDepth : amplitude du parallaxe de l'écran. */
     emissionDepth?: number;
     iconScale?: number;
 }
@@ -28,7 +28,7 @@ export type LeonShaderParams = EmissiveGlowParams | FlipbookEyeParams;
 export interface LeonBaseColorParams {
     color?: [number, number, number];
     multiplier?: number;
-    /** glTF texture index of _DetachableMask.r. */
+    /** Index de la texture glTF de _DetachableMask.r. */
     detachableMask?: number;
     alphaCutoff?: number;
 }
@@ -45,7 +45,7 @@ interface ShaderPatch {
     apply(shader: Shader): void;
 }
 
-/** Several patches can target the same material (e.g. cutout + glow), they are applied in one pass. */
+/** Ajoute un patch au shader du matériau, tous ses patchs sont appliqués en une seule passe. */
 function addPatch(material: THREE.MeshStandardMaterial, patch: ShaderPatch) {
     const patches: ShaderPatch[] = (material.userData.leonPatches ??= []);
     patches.push(patch);
@@ -63,15 +63,14 @@ function addPatch(material: THREE.MeshStandardMaterial, patch: ShaderPatch) {
     material.needsUpdate = true;
 }
 
-/** Uniforms of a patched material, available once three.js has compiled it. */
+/** Uniforms d'un matériau patché, disponibles une fois le shader compilé par three.js. */
 export function getLeonUniforms(material: THREE.Material): LeonShaderUniforms | undefined {
     return material.userData.leonShaderUniforms;
 }
 
 /**
- * Leon.shadergraph glow: the emissive color goes from full value to full value x emissiveLowerValue
- * following sin(time x glowSpeed), masked by the emissive texture. Only the hue of the Unity color
- * is kept: its magnitude comes from a gamma conversion of an HDR value and is not meaningful here.
+ * Pulsation émissive de Leon.shadergraph : la couleur varie entre sa pleine valeur et valeur x emissiveLowerValue
+ * selon sin(temps x glowSpeed), masquée par la texture émissive. Seule la teinte de la couleur Unity est gardée.
  */
 export function applyEmissiveGlow(material: THREE.MeshStandardMaterial, params: EmissiveGlowParams, intensity: number) {
     const raw = params.colorEmissive ?? [0, 1, 0];
@@ -105,15 +104,16 @@ export function applyEmissiveGlow(material: THREE.MeshStandardMaterial, params: 
 }
 
 /**
- * LeonEyeShader.shadergraph screen: the current flipbook frame (emissive texture) is shown
- * on a grid of round/square LEDs, dimmed at grazing angles and driven by the audio level.
- * A parallax offset (URP ParallaxOffset1Step, flat heightmap) makes the screen look recessed.
- * The "broken" noise is not reproduced. The eye color is set at runtime by the app, so the
- * site provides it (as an HDR color, it has to shine through the dark glass).
+ * Écran de LeonEyeShader.shadergraph : l'image du flipbook s'affiche sur une grille de LED, avec un parallaxe,
+ * atténuée sur les bords et pilotée par le niveau du son. Le bruit "broken" n'est pas reproduit.
  */
 export function applyFlipbookEye(material: THREE.MeshStandardMaterial, params: FlipbookEyeParams, eyeColor: THREE.Color) {
     const grid = params.animationGridSize ?? 1;
     const gridSize = Array.isArray(grid) ? grid : [grid, grid];
+    const eyeColorUniform = { value: new THREE.Color() };
+    material.userData.leonEyeColor = eyeColorUniform;
+    material.userData.leonEyeIntensity = params.emissionIntensity ?? 1;
+    setEyeColor(material, eyeColor);
 
     addPatch(material, {
         key: 'eye',
@@ -125,9 +125,10 @@ export function applyFlipbookEye(material: THREE.MeshStandardMaterial, params: F
             shader.uniforms.uBevel = { value: params.bevel ?? 0.6 };
             shader.uniforms.uEdgeWeight = { value: params.edgeWeight ?? 0.25 };
             shader.uniforms.uIconScale = { value: params.iconScale ?? 1 };
-            // Shader Graph's Parallax Mapping node scales its amplitude by 0.01.
+            // Le nœud Parallax Mapping de Shader Graph multiplie son amplitude par 0.01.
             shader.uniforms.uDepth = { value: (params.emissionDepth ?? 0) * 0.01 };
-            shader.uniforms.uEyeColor = { value: eyeColor.clone().multiplyScalar(params.emissionIntensity ?? 1) };
+            shader.uniforms.uEyeColor = eyeColorUniform;
+            // Le mesh n'a pas de tangentes : le repère tangent est calculé avec les dérivées écran.
             shader.fragmentShader = `
                 uniform vec2 uGrid;
                 uniform float uSpeed;
@@ -142,7 +143,6 @@ export function applyFlipbookEye(material: THREE.MeshStandardMaterial, params: F
                 '#include <emissivemap_fragment>',
                 `
                 #ifdef USE_EMISSIVEMAP
-                    // The mesh has no tangents: build the tangent frame from screen-space derivatives.
                     vec3 leonDpdx = dFdx( -vViewPosition );
                     vec3 leonDpdy = dFdy( -vViewPosition );
                     vec2 leonDuvx = dFdx( vEmissiveMapUv );
@@ -179,7 +179,13 @@ export function applyFlipbookEye(material: THREE.MeshStandardMaterial, params: F
     });
 }
 
-/** Leon.shadergraph cutout: the body is clipped where _DetachableMask.r is below the cutoff (detachable panels). */
+/** Change la couleur HDR d'un œil patché par applyFlipbookEye, sans recompiler le shader. */
+export function setEyeColor(material: THREE.Material, color: THREE.Color) {
+    const uniform: THREE.IUniform<THREE.Color> | undefined = material.userData.leonEyeColor;
+    uniform?.value.copy(color).multiplyScalar(material.userData.leonEyeIntensity ?? 1);
+}
+
+/** Découpe de Leon.shadergraph : le corps est masqué là où _DetachableMask.r passe sous le seuil (panneaux amovibles). */
 export function applyDetachableMask(material: THREE.MeshStandardMaterial, mask: THREE.Texture, cutoff: number) {
     addPatch(material, {
         key: 'detachable',

@@ -1,4 +1,4 @@
-# Export glTF pour le web — instructions pour le modkit
+# Export glTF pour le web : instructions pour le modkit
 
 ## Contexte
 
@@ -6,8 +6,8 @@ Le site dremixam.com affiche Léon en 3D dans le navigateur via Three.js. Il lui
 glTF/`.glb` du personnage, en plus de l'export `.leon` (AssetBundle) déjà géré par le modkit pour
 l'appli de stream. L'export Needle/UnityGLTF précédent a été retiré du projet : il apportait trop
 de dépendances liées à Needle Engine pour ce qui est réellement nécessaire ici, et de toute façon
-il ne savait pas exporter correctement les matériaux à Shader Graph custom (corps, panneaux, œil) —
-un test avec `SkinLeonMKIII.glb` a confirmé que ces matériaux ressortaient sans aucune texture.
+il ne savait pas exporter correctement les matériaux à Shader Graph custom (corps, panneaux, œil).
+Un test avec `SkinLeonMKIII.glb` a confirmé que ces matériaux ressortaient sans aucune texture.
 
 Objectif : une nouvelle fonctionnalité d'export dans le modkit, à côté de l'export `.leon` existant
 (`Assets/Modkit/Editor/ExportExportableAssetPrefab.cs`), qui produit un `.glb` autonome et
@@ -35,7 +35,7 @@ contrôle). Deux options, à choisir selon le temps qu'on veut y mettre :
 
 - **Option recommandée pour démarrer** : dépendre du package upstream `KhronosGroup/UnityGLTF`
   (le dépôt officiel Khronos, pas un fork Needle) via Package Manager (URL git). Il fait l'écriture
-  du binaire glTF/glb, des accessors, du binaire des meshes, etc. — on branche juste la logique
+  du binaire glTF/glb, des accessors, du binaire des meshes, etc. On branche juste la logique
   personnalisée (textures custom, `extras`) par-dessus via ses hooks d'export (`IGLTFExportPlugin`/
   callbacks de matériau et de nœud selon la version du package).
 - **Option "zéro dépendance"** : écrire un writer glTF minimal directement dans le modkit (JSON +
@@ -58,7 +58,7 @@ canaux qui existent pour le corps/panneaux/œil) :
 | `LeonMetalFrameMat`, `LeonMetalInteriorMat`, `LeonCableMat`, `LeonCircuitMat` | déjà en PBR/URP-Lit standard | déjà géré par un export glTF classique, rien de spécial à faire |
 
 Redimensionner ces textures pour le web avant export (suggestion : 1024² max pour les textures de
-couleur/normal, 512² pour les masques) — c'est la version "allégée" demandée pour le site.
+couleur/normal, 512² pour les masques), c'est la version "allégée" demandée pour le site.
 
 ## 4. Paramètres de shader à écrire en `extras` (matériau)
 
@@ -143,7 +143,7 @@ Concrètement, dans le code de l'exporteur : après avoir laissé la bibliothèq
 nœuds normalement, parcourir la hiérarchie source, pour chaque `GameObject` récupérer les composants
 qui héritent d'une classe de base commune "Exportable" (si ce n'est pas déjà le cas, ajouter une
 interface ou classe abstraite `ILeonExportableBehavior` implémentée par `RotateComponent`,
-`EyeComponent`, etc., avec une méthode qui renvoie son propre JSON d'`extras` — ça centralise la
+`EyeComponent`, etc., avec une méthode qui renvoie son propre JSON d'`extras`, ça centralise la
 sérialisation dans chaque composant plutôt que dans l'exporteur, et un nouveau composant Exportable
 n'aura qu'à implémenter cette méthode pour être automatiquement supporté par l'export web), puis
 écrire ce JSON dans les `extras` du nœud glTF correspondant (retrouvé via le mapping GameObject →

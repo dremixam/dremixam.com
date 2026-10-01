@@ -1,13 +1,9 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { blogVisible, getPosts } from '../blog';
+import { blogUrl, formatDate } from '../i18n';
 
-// Section blog masquée le temps de finir le blog.
-const showBlog = false;
-
-const [latestPost] = (await getCollection('blog', ({ data }) => !data.draft)).sort(
-    (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf()
-);
+const [latestPost] = await getPosts('fr');
 ---
 
 <BaseLayout title="Le Laboratoire du Dr Emixam" description="Le site de DrEmixam : liens, projets et Léon le robot.">
@@ -25,7 +21,14 @@ const [latestPost] = (await getCollection('blog', ({ data }) => !data.draft)).so
                 <p class="intro">Mes créations n'engagent que ceux qui les croient.</p>
 
                 <ul class="links">
-                    <li class="wide"><a class="primary" target="_blank" href="https://twitch.dremixam.com/"><i class="icon bi bi-twitch"></i><span class="txt">Twitch</span></a></li>
+                    <li class="wide twitch" id="twitch">
+                        <a class="primary" target="_blank" href="https://twitch.dremixam.com/">
+                            <i class="icon bi bi-twitch"></i>
+                            <span class="twitch-text"><span class="txt">Twitch</span><small class="twitch-info" hidden></small></span>
+                            <span class="live-badge">En direct</span>
+                        </a>
+                        <div class="twitch-player"><div class="twitch-player-inner"></div></div>
+                    </li>
                     <li><a target="_blank" href="https://discord.dremixam.com/"><i class="icon bi bi-discord"></i><span class="txt">Discord</span></a></li>
                     <li>
                         <a target="_blank" href="https://bsky.app/profile/dremixam.com">
@@ -46,18 +49,16 @@ const [latestPost] = (await getCollection('blog', ({ data }) => !data.draft)).so
                     <li><a target="_blank" href="https://www.youtube.com/@DrEmixamTwitch" title="Replays et clips"><i class="icon bi bi-youtube"></i><span class="txt">YouTube</span></a></li>
                 </ul>
 
-                {showBlog && latestPost && (
+                {blogVisible && latestPost && (
                     <>
                         <h2 class="label">Le blog</h2>
-                        <a class="post-card" href={`/blog/${latestPost.id}/`}>
+                        <a class="post-card" href={latestPost.url}>
                             <span class="stamp">Nouveau</span>
-                            <small>
-                                {latestPost.data.publishDate.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
-                            </small>
-                            <strong>{latestPost.data.title}</strong>
-                            <p>{latestPost.data.description}</p>
+                            <small>{formatDate(latestPost.entry.data.publishDate, 'fr')}</small>
+                            <strong>{latestPost.entry.data.title}</strong>
+                            <p>{latestPost.entry.data.description}</p>
                         </a>
-                        <a class="more-link" href="/blog/">Tous les articles</a>
+                        <a class="more-link" href={blogUrl('fr')}>Tous les articles</a>
                     </>
                 )}
 
@@ -88,18 +89,36 @@ const [latestPost] = (await getCollection('blog', ({ data }) => !data.draft)).so
         </div>
     </div>
 
-    <button id="audioToggle" type="button" class="bi bi-volume-mute-fill">
-        <span class="audio-label"><span class="audio-label-inner"><span class="when-muted">Activer le son</span><span class="when-playing">Désactiver le son</span></span></span>
-    </button>
+    <p id="leonSubtitle" class="leon-subtitle"></p>
+
+    <div class="leon-controls">
+        <button id="audioToggle" type="button" class="pill-toggle bi bi-volume-mute-fill" aria-pressed="false">
+            <span class="pill-label"><span class="pill-label-inner"><span class="when-off">Activer le son</span><span class="when-on">Désactiver le son</span></span></span>
+        </button>
+        <button id="subtitleToggle" type="button" class="pill-toggle bi bi-badge-cc" aria-pressed="false">
+            <span class="pill-label"><span class="pill-label-inner"><span class="when-off">Activer les sous-titres</span><span class="when-on">Désactiver les sous-titres</span></span></span>
+        </button>
+    </div>
 
     <script>
         import { initLeon } from '../scripts/leon';
+        import { initSubtitles } from '../scripts/subtitles';
 
         const container = document.getElementById('col1');
         const audioToggle = document.getElementById('audioToggle');
+        const subtitleToggle = document.getElementById('subtitleToggle');
+        const subtitle = document.getElementById('leonSubtitle');
         if (container && audioToggle) {
-            initLeon(container, audioToggle);
+            const subtitles = subtitleToggle && subtitle ? initSubtitles(subtitleToggle, subtitle) : undefined;
+            initLeon(container, audioToggle, subtitles);
         }
+    </script>
+
+    <script>
+        import { initTwitchButton } from '../scripts/twitch';
+
+        const twitch = document.getElementById('twitch');
+        if (twitch) initTwitchButton(twitch);
     </script>
 
     <script>

@@ -12,26 +12,20 @@ import {
     applyEmissiveGlow,
     applyFlipbookEye,
     getLeonUniforms,
+    setEyeColor,
     type LeonBaseColorParams,
     type LeonShaderParams,
 } from './leonMaterials';
+import { DEFAULT_EYE, MESSAGES, WELCOME_MESSAGE, type LeonMessage } from './leonMessages';
+import type { Subtitles } from './subtitles';
 
-/** Largest dimension of the robot, in scene units (size of the original model). */
+/** Plus grande dimension du robot, en unités de scène (taille du modèle d'origine). */
 const MODEL_SIZE = 2;
-/**
- * HDR eye color, multiplied by the exported _EmissionIntensity. Very high on purpose, like in the app:
- * it has to go through the dark glass and drive the bloom. Almost no red, so the core stays cyan.
- */
-const EYE_COLOR = new THREE.Color(0.002, 0.9, 1.0).multiplyScalar(20);
-/** Icon shown on the eye screen (the app picks it at runtime, the export only has the default one). */
-const EYE_ICON = '/textures/leon-eye.png';
 const GLOW_INTENSITY = 30;
+/** Volume de la voix de Léon, entre 0 et 1. */
+const VOICE_VOLUME = 0.8;
 
-/**
- * Final pass: URP "Neutral" tone mapping (per channel, unlike three's NeutralToneMapping which
- * crushes dark saturated colors), sRGB output, and the scene alpha from before the bloom so the
- * glow adds light over the page instead of drawing a dark box.
- */
+/** Passe finale : tone mapping "Neutral" de URP par canal, sortie sRGB et alpha de la scène d'avant le bloom. */
 const FinalShader = {
     uniforms: { tDiffuse: { value: null }, tBase: { value: null } },
     vertexShader: `
@@ -67,13 +61,10 @@ const FinalShader = {
     `,
 };
 
-export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement) {
+export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement, subtitles?: Subtitles) {
     let audioEnabled = false;
     let timeout: ReturnType<typeof setTimeout> | undefined;
-    let lastAudio = '';
-
-    const WelcomeAudio = '/audio/welcome.ogg';
-    const RandomAudio = Array.from({ length: 33 }, (_, i) => `/audio/${i + 1}.ogg`);
+    let lastMessage: LeonMessage | null = null;
 
     const clock = new THREE.Clock();
     const scene = new THREE.Scene();
@@ -96,9 +87,8 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement)
     renderer.setSize(container.offsetWidth, container.offsetHeight);
     renderer.setAnimationLoop(animate);
 
-    // Render in a linear HDR buffer and tone map once at the end (like Unity): otherwise each
-    // object is tone mapped before blending, and the dark eye glass crushes the emissive screen.
-    // Bloom settings follow the modkit's URP profile (threshold 1).
+    // Rendu dans un buffer HDR linéaire, tone mapping une seule fois à la fin comme dans Unity.
+    // Réglages du bloom repris du profil URP du modkit (seuil 1).
     const composer = new EffectComposer(renderer);
     composer.renderTarget1.samples = 4;
     composer.renderTarget2.samples = 4;
@@ -121,16 +111,27 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement)
     let leon: THREE.Group | null = null;
     let behaviors: ResolvedBehaviors | null = null;
     const shaderMaterials: THREE.Material[] = [];
+    const eyeMaterials: THREE.MeshStandardMaterial[] = [];
     let legacyEyeMaterial: THREE.MeshStandardMaterial | null = null;
 
     const basePosition = { x: 0, y: 0, z: 0 };
     const baseRotation = { x: 0.3, y: 0.4, z: 0 };
 
-    const eyeIcon = new THREE.TextureLoader().load(EYE_ICON, (texture) => {
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.flipY = false;
-        texture.needsUpdate = true;
-    });
+    const iconLoader = new THREE.TextureLoader();
+    const icons = new Map<string, Promise<THREE.Texture>>();
+
+    function loadIcon(url: string): Promise<THREE.Texture> {
+        let icon = icons.get(url);
+        if (!icon) {
+            icon = iconLoader.loadAsync(url).then((texture) => {
+                texture.colorSpace = THREE.SRGBColorSpace;
+                texture.flipY = false;
+                return texture;
+            });
+            icons.set(url, icon);
+        }
+        return icon;
+    }
 
     new GLTFLoader().load('/leon.glb', async (gltf) => {
         const model = gltf.scene;
@@ -148,7 +149,7 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement)
         for (const material of materials) {
             if (!(material instanceof THREE.MeshStandardMaterial)) continue;
 
-            // Translucent base color without an explicit alphaMode (glass).
+            // Couleur de base translucide sans alphaMode explicite (verre).
             if (material.opacity < 1) {
                 material.transparent = true;
                 material.depthWrite = false;
@@ -165,21 +166,21 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement)
                 applyEmissiveGlow(material, params, GLOW_INTENSITY);
                 shaderMaterials.push(material);
             } else if (params?.type === 'flipbookEye') {
-                material.emissiveMap = eyeIcon;
-                applyFlipbookEye(material, { ...params, animationGridSize: [1, 1] }, EYE_COLOR);
+                material.emissiveMap = await loadIcon(DEFAULT_EYE.eyeIcon);
+                applyFlipbookEye(material, { ...params, animationGridSize: [1, 1] }, eyeColor(WELCOME_MESSAGE));
                 shaderMaterials.push(material);
+                eyeMaterials.push(material);
             }
         }
 
         const legacyEye = behaviors.eye as THREE.Mesh | null;
         if (legacyEye?.isMesh && legacyEye.material instanceof THREE.MeshStandardMaterial && !legacyEye.material.userData.leonShader) {
             legacyEyeMaterial = legacyEye.material;
-            legacyEyeMaterial.emissive = EYE_COLOR.clone();
+            legacyEyeMaterial.emissive = eyeColor(WELCOME_MESSAGE);
             legacyEyeMaterial.emissiveIntensity = 0;
         }
 
-        // Exports come in arbitrary units: center the model in a pivot and give it the same
-        // size on screen as the original model, whatever the export scale.
+        // Centre le modèle dans un pivot et lui donne la taille du modèle d'origine, quelle que soit l'échelle de l'export.
         model.updateMatrixWorld(true);
         const box = new THREE.Box3().setFromObject(model, true);
         const size = box.getSize(new THREE.Vector3());
@@ -192,8 +193,7 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement)
         scene.add(leon);
     });
 
-    // Calibrated on a render from the stream app: strong warm light from above, weak ambient,
-    // reflections doing most of the work on the metal parts (the grey albedo turns warm beige).
+    // Éclairage réglé sur un rendu de l'appli de stream.
     const light = new THREE.DirectionalLight(new THREE.Color(1.0, 0.87, 0.7), 4.2);
     light.position.set(-0.3, 1, 0.6).normalize();
     scene.add(light);
@@ -217,10 +217,8 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement)
             bumpRobot(intersects[0].point);
 
             if (!audioEnabled) {
-                audioToggleButton.classList.remove('bi-volume-mute-fill');
-                audioToggleButton.classList.add('bi-volume-up-fill');
-                audioEnabled = true;
-                playAudioVoice(WelcomeAudio);
+                setAudioEnabled(true);
+                playMessage(WELCOME_MESSAGE);
             }
         }
     });
@@ -310,17 +308,20 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement)
         composer.setSize(container.offsetWidth, container.offsetHeight);
     });
 
+    function setAudioEnabled(enabled: boolean) {
+        audioEnabled = enabled;
+        audioToggleButton.classList.toggle('bi-volume-up-fill', enabled);
+        audioToggleButton.classList.toggle('bi-volume-mute-fill', !enabled);
+        audioToggleButton.setAttribute('aria-pressed', String(enabled));
+    }
+
     audioToggleButton.addEventListener('click', () => {
         if (audioEnabled) {
-            audioToggleButton.classList.remove('bi-volume-up-fill');
-            audioToggleButton.classList.add('bi-volume-mute-fill');
             if (timeout) clearTimeout(timeout);
-            audioEnabled = false;
+            setAudioEnabled(false);
         } else {
-            audioToggleButton.classList.remove('bi-volume-mute-fill');
-            audioToggleButton.classList.add('bi-volume-up-fill');
-            audioEnabled = true;
-            playAudioVoice(WelcomeAudio);
+            setAudioEnabled(true);
+            playMessage(WELCOME_MESSAGE);
         }
     });
 
@@ -334,44 +335,82 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement)
         }
     }
 
-    function playAudioVoice(audioSrc: string) {
-        const audioContext = new AudioContext();
-        const audio = new Audio(audioSrc);
-        const source = audioContext.createMediaElementSource(audio);
-        const analyser = audioContext.createAnalyser();
-        source.connect(analyser);
-        analyser.connect(audioContext.destination);
-        analyser.fftSize = 256;
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
+    function eyeColor(message: LeonMessage): THREE.Color {
+        return new THREE.Color(message.eyeColor ?? DEFAULT_EYE.eyeColor).multiplyScalar(message.eyeIntensity ?? DEFAULT_EYE.eyeIntensity);
+    }
+
+    /** Donne à l'œil la couleur et l'icône de la réplique. */
+    function showMessageOnEye(message: LeonMessage) {
+        const color = eyeColor(message);
+        for (const material of eyeMaterials) setEyeColor(material, color);
+        legacyEyeMaterial?.emissive.copy(color);
+
+        loadIcon(message.eyeIcon ?? DEFAULT_EYE.eyeIcon)
+            .catch(() => loadIcon(DEFAULT_EYE.eyeIcon))
+            .then((icon) => {
+                for (const material of eyeMaterials) material.emissiveMap = icon;
+            });
+    }
+
+    function preloadIcons() {
+        for (const message of [WELCOME_MESSAGE, ...MESSAGES]) {
+            if (message.eyeIcon) loadIcon(message.eyeIcon).catch(() => {});
+        }
+    }
+
+    let audioContext: AudioContext | null = null;
+    let analyser: AnalyserNode | null = null;
+
+    function scheduleNextMessage() {
+        timeout = setTimeout(() => {
+            if (!audioEnabled) return;
+            let message: LeonMessage;
+            do {
+                message = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
+            } while (MESSAGES.length > 1 && message === lastMessage);
+            lastMessage = message;
+            playMessage(message);
+        }, Math.floor(Math.random() * 10000) + 10000);
+    }
+
+    function playMessage(message: LeonMessage) {
+        if (!audioContext) {
+            audioContext = new AudioContext();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            // Le volume est appliqué après l'analyseur : l'éclat de l'œil n'en dépend pas.
+            const volume = audioContext.createGain();
+            volume.gain.value = VOICE_VOLUME;
+            analyser.connect(volume).connect(audioContext.destination);
+            preloadIcons();
+        }
+        const meter = analyser!;
+        const audio = new Audio(message.audio);
+        audioContext.createMediaElementSource(audio).connect(meter);
+        // requestAnimationFrame est suspendu dans un onglet caché, la fin de la réplique est aussi suivie ici.
+        audio.addEventListener('ended', () => subtitles?.hide());
+        const dataArray = new Uint8Array(meter.frequencyBinCount);
 
         function displayVolume() {
-            analyser.getByteFrequencyData(dataArray);
-            const sum = dataArray.reduce((a, b) => a + b, 0);
-            const averageVolume = sum / bufferLength;
-
+            meter.getByteFrequencyData(dataArray);
+            const averageVolume = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
             setEyeIntensity(averageVolume);
 
             if (audioEnabled && !audio.paused) {
                 requestAnimationFrame(displayVolume);
-            } else if (!audioEnabled && !audio.paused) {
-                audio.pause();
-                setEyeIntensity(0);
-            } else if (audioEnabled && audio.paused) {
-                setEyeIntensity(0);
-                timeout = setTimeout(() => {
-                    if (!audioEnabled) return;
-                    let randomElement: string;
-                    do {
-                        randomElement = RandomAudio[Math.floor(Math.random() * RandomAudio.length)];
-                    } while (lastAudio === randomElement);
-                    lastAudio = randomElement;
-                    playAudioVoice(randomElement);
-                }, Math.floor(Math.random() * 10000) + 10000);
+                return;
             }
+            audio.pause();
+            setEyeIntensity(0);
+            subtitles?.hide();
+            if (audioEnabled) scheduleNextMessage();
         }
 
-        audio.play();
-        displayVolume();
+        showMessageOnEye(message);
+        audioContext.resume();
+        audio.play().then(() => {
+            subtitles?.show(message.text, audio);
+            displayVolume();
+        }, () => setEyeIntensity(0));
     }
 }

@@ -33,7 +33,7 @@ body {
     line-height: 1.55;
 }
 
-a:focus-visible, button:focus-visible, #audioToggle:focus-visible {
+a:focus-visible, button:focus-visible {
     outline: 3px solid var(--cream);
     outline-offset: 3px;
 }
@@ -172,6 +172,66 @@ h1.logo img:hover { transform: scale(1.04) rotate(-2deg); }
 .links a.primary { background: var(--brand-purple-dark); color: var(--cream);}
 .links a.primary:hover { background: var(--brand-purple-dark); color: var(--cream);}
 .links a.primary:active { background: var(--brand-purple-dark); color: var(--cream);}
+
+/* === Bouton Twitch : date du prochain live, ou le live lui-même sous le bouton === */
+.twitch-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.5em; }
+
+.twitch-info {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.85rem;
+    line-height: 1.2;
+    text-transform: none;
+    opacity: 0.85;
+    text-box: trim-both cap alphabetic;
+}
+
+.live-badge {
+    display: none;
+    align-items: center;
+    gap: 0.45em;
+    padding: 0.4em 0.65em;
+    background: var(--red);
+    color: var(--cream);
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: 0.75rem;
+    line-height: 1;
+    letter-spacing: 0.06em;
+}
+
+.live-badge::before {
+    content: '';
+    width: 0.6em;
+    height: 0.6em;
+    border-radius: 50%;
+    background: currentColor;
+    animation: live-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes live-pulse { 50% { opacity: 0.25; } }
+
+.twitch-player { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.6s ease; }
+.twitch-player-inner { min-height: 0; overflow: hidden; }
+.twitch-player iframe { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 0; }
+
+.twitch.is-live {
+    background: var(--brand-purple-dark);
+    border: var(--line);
+    border-radius: 12px;
+    box-shadow: var(--sticker-shadow);
+    overflow: hidden;
+}
+
+.links .twitch.is-live > a { height: auto; border: 0; border-radius: 0; box-shadow: none; transform: none; }
+.twitch.is-live .live-badge { display: inline-flex; }
+.twitch.is-live .twitch-player { grid-template-rows: 1fr; border-top: var(--line); }
+
+@media (prefers-reduced-motion: reduce) {
+    .live-badge::before { animation: none; }
+    .twitch-player { transition: none; }
+}
 
 .links .icon, .support .icon {
     flex: none;
@@ -314,14 +374,19 @@ h1.logo img:hover { transform: scale(1.04) rotate(-2deg); }
 #status-indicator.degraded .dot { background: var(--orange); }
 #status-indicator.downtime .dot { background: var(--red); }
 
-/* === Bouton son === */
-/* Rond au repos, s'allonge en pastille avec son texte au survol ou au focus clavier. */
-#audioToggle {
-    --icon-size: 1.4rem;
+/* === Boutons son et sous-titres === */
+.leon-controls {
     position: fixed;
     left: 1rem;
     bottom: 1rem;
     z-index: 200;
+    display: flex;
+    gap: 0.6rem;
+}
+
+/* Rond au repos, s'allonge en pastille avec son texte au survol ou au focus clavier. */
+.pill-toggle {
+    --icon-size: 1.4rem;
     height: 3rem;
     display: flex;
     align-items: center;
@@ -337,10 +402,10 @@ h1.logo img:hover { transform: scale(1.04) rotate(-2deg); }
     transition: transform 0.12s, box-shadow 0.12s, background 0.4s ease, padding 0.3s ease;
 }
 
-#audioToggle::before { font-size: var(--icon-size); }
+.pill-toggle::before { font-size: var(--icon-size); }
 
 /* La colonne passe de 0fr à 1fr : l'allongement s'arrête pile à la largeur du texte. */
-#audioToggle .audio-label {
+.pill-toggle .pill-label {
     display: grid;
     grid-template-columns: 0fr;
     font-size: 0.95rem;
@@ -348,36 +413,72 @@ h1.logo img:hover { transform: scale(1.04) rotate(-2deg); }
     transition: grid-template-columns 0.3s ease, margin 0.3s ease;
 }
 
-#audioToggle .audio-label-inner {
+.pill-toggle .pill-label-inner {
     min-width: 0;
     overflow: hidden;
     display: grid;
 }
 
 /* Les deux libellés sont superposés : la largeur ne change pas quand on bascule. */
-#audioToggle .audio-label-inner > span {
+.pill-toggle .pill-label-inner > span {
     grid-area: 1 / 1;
     white-space: nowrap;
     transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
 }
 
-#audioToggle.bi-volume-mute-fill .when-playing,
-#audioToggle.bi-volume-up-fill .when-muted {
+.pill-toggle[aria-pressed="false"] .when-on,
+.pill-toggle[aria-pressed="true"] .when-off {
     opacity: 0;
     visibility: hidden;
     transform: translateY(0.5em);
 }
 
-#audioToggle:focus-visible { padding-right: 1rem; }
-#audioToggle:focus-visible .audio-label { grid-template-columns: 1fr; margin-left: 0.5rem; }
+.pill-toggle:focus-visible { padding-right: 1rem; }
+.pill-toggle:focus-visible .pill-label { grid-template-columns: 1fr; margin-left: 0.5rem; }
 
 @media (hover: hover) {
-    #audioToggle:hover { padding-right: 1rem; }
-    #audioToggle:hover .audio-label { grid-template-columns: 1fr; margin-left: 0.5rem; }
+    .pill-toggle:hover { padding-right: 1rem; }
+    .pill-toggle:hover .pill-label { grid-template-columns: 1fr; margin-left: 0.5rem; }
 }
 
-#audioToggle.bi-volume-mute-fill { background: var(--cream); }
-#audioToggle:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--plum); }
+.pill-toggle[aria-pressed="false"] { background: var(--cream); }
+.pill-toggle:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--plum); }
+
+/* === Sous-titres de Léon : sous le robot en paysage, en bas de l'écran en portrait === */
+.leon-subtitle {
+    position: fixed;
+    z-index: 150;
+    left: 1rem;
+    right: calc(60vw + 1rem);
+    bottom: 5rem;
+    width: fit-content;
+    max-width: 26ch;
+    margin: 0 auto;
+    padding: 0.45em 0.8em;
+    background: var(--plum);
+    color: var(--cream);
+    border-radius: 12px;
+    box-shadow: 3px 3px 0 var(--brand-purple-dark);
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-align: center;
+    text-wrap: balance;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(0.4em);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+}
+
+.leon-subtitle.visible { opacity: 1; visibility: visible; transform: none; }
+
+@media (orientation: portrait) {
+    .leon-subtitle { right: 1rem; font-size: 1.25rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .leon-subtitle { transform: none; }
+}
 
 /* === Blog === */
 .site-header {

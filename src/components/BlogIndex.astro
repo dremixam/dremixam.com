@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getPosts } from '../blog';
+import { LANGS, blogUrl, formatDate, ui, type Lang } from '../i18n';
+
+interface Props {
+    lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+const posts = await getPosts(lang);
+const otherLangs = LANGS.filter((l) => l !== lang);
+---
+
+<BaseLayout
+    lang={lang}
+    title={`${t.blogTitle} — ${t.siteName}`}
+    description={t.blogIntro}
+    alternates={LANGS.map((l) => ({ lang: l, url: blogUrl(l) }))}
+>
+    <main class="blog-page">
+        <div class="blog-top">
+            <a class="site-header" href="/">
+                <img src="/logo.svg" alt="" width="669" height="650" />
+                <span class="txt">{t.backHome}</span>
+            </a>
+            <nav class="lang-switch" aria-label={t.languageSwitch}>
+                {otherLangs.map((l) => (
+                    <a href={blogUrl(l)} hreflang={l} lang={l}><span class="txt">{ui[l].blogInThisLang}</span></a>
+                ))}
+            </nav>
+        </div>
+
+        <h1>{t.blogTitle}</h1>
+        <p>{t.blogIntro}</p>
+
+        {posts.length === 0 ? (
+            <p>{t.noPosts}</p>
+        ) : (
+            <ul class="blog-list">
+                {posts.map((post, index) => (
+                    <li>
+                        <a class="post-card" href={post.url}>
+                            {index === 0 && <span class="stamp">{t.newBadge}</span>}
+                            <small>
+                                <time datetime={post.entry.data.publishDate.toISOString()}>
+                                    {formatDate(post.entry.data.publishDate, lang)}
+                                </time>
+                            </small>
+                            <strong>{post.entry.data.title}</strong>
+                            <p>{post.entry.data.description}</p>
+                            {post.entry.data.tags.length > 0 && (
+                                <div class="post-tags">
+                                    {post.entry.data.tags.map((tag) => <span class="post-tag">{tag}</span>)}
+                                </div>
+                            )}
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        )}
+    </main>
+</BaseLayout>

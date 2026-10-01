@@ -3,7 +3,7 @@ import * as THREE from 'three';
 export interface RotateBehavior {
     type: 'rotate';
     axis?: 'x' | 'y' | 'z';
-    /** Radians per second. */
+    /** Radians par seconde. */
     speed: number;
 }
 
@@ -23,7 +23,7 @@ export interface Spinner {
 
 export interface ResolvedBehaviors {
     spinners: Spinner[];
-    /** The eye mesh, if found, for audio-reactive intensity driving. */
+    /** Le mesh de l'œil s'il existe, son intensité suit le son. */
     eye: THREE.Object3D | null;
 }
 
@@ -34,9 +34,8 @@ function spinner(object: THREE.Object3D, axis: 'x' | 'y' | 'z', speed: number): 
 }
 
 /**
- * Reads `node.userData.leonBehaviors` (glTF `extras` written by the modkit's web exporter,
- * see docs/unity-export-instructions.md) across the whole scene. Falls back to the legacy
- * name-based lookup (FansLeft/FansRight/Eye) for models without that metadata.
+ * Lit `node.userData.leonBehaviors` (`extras` glTF écrits par le modkit, voir docs/unity-export-instructions.md)
+ * dans toute la scène. Sans ces données, cherche les objets par leur nom (FansLeft/FansRight/Eye).
  */
 export function resolveBehaviors(scene: THREE.Object3D): ResolvedBehaviors {
     const spinners: Spinner[] = [];
@@ -71,7 +70,7 @@ export function resolveBehaviors(scene: THREE.Object3D): ResolvedBehaviors {
 
 const _spin = new THREE.Quaternion();
 
-/** Rotates each spinner around its local axis, on top of its rest orientation. */
+/** Fait tourner chaque spinner autour de son axe local, à partir de son orientation de repos. */
 export function updateSpinners(spinners: Spinner[], elapsedTime: number) {
     for (const s of spinners) {
         s.object.quaternion.copy(s.rest).multiply(_spin.setFromAxisAngle(s.axis, s.speed * elapsedTime));

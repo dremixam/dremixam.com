@@ -1,27 +1,35 @@
 ---
 import '../styles/global.css';
+import type { Lang } from '../i18n';
 
 interface Props {
     title?: string;
     description?: string;
+    lang?: Lang;
+    /** Versions de la page dans chaque langue, y compris celle-ci. */
+    alternates?: { lang: Lang; url: string }[];
 }
 
-const { title = 'DrEmixam', description = 'Le site personnel de DrEmixam.' } = Astro.props;
+const { title = 'DrEmixam', description = 'Le site personnel de DrEmixam.', lang = 'fr', alternates = [] } = Astro.props;
 ---
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang={lang}>
 
 <head>
     <meta charset="utf-8" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {alternates.length > 1 && alternates.map((alt) => (
+        <link rel="alternate" hreflang={alt.lang} href={new URL(alt.url, Astro.site).href} />
+    ))}
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Antonio:wght@600&family=Nunito:wght@500;700;800&display=swap" />    <script defer src="https://stats.dremixam.com/script.js" data-website-id="8cb56c5c-a278-43b0-9b40-8f3cdac4d109"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Antonio:wght@600&family=Nunito:wght@500;700;800&display=swap" />
+    <script defer src="https://stats.dremixam.com/script.js" data-website-id="8cb56c5c-a278-43b0-9b40-8f3cdac4d109"></script>
 </head>
 
 <body>
