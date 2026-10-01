@@ -8,6 +8,10 @@ export interface EyeLook {
     eyeColor?: string;
     /** Multiplicateur HDR de la couleur, c'est lui qui règle la force du bloom. */
     eyeIntensity?: number;
+    /** Pour une image animée : nombre d'images en [colonnes, lignes] dans eyeIcon. */
+    eyeGrid?: [number, number];
+    /** Vitesse de l'animation, en images par seconde. */
+    eyeSpeed?: number;
 }
 
 /** Une réplique de Léon : ce qu'il dit, et l'aspect de son œil pendant qu'il le dit. */
@@ -31,6 +35,17 @@ export function unityEyeColor(r: number, g: number, b: number): Required<Pick<Ey
 export const DEFAULT_EYE: Required<EyeLook> = {
     eyeIcon: '/textures/leon-eye.png',
     ...unityEyeColor(18.0705814, 125.769257, 191.748978),
+    eyeGrid: [1, 1],
+    eyeSpeed: 0,
+};
+
+/** Œil affiché tant que le son est coupé. */
+export const SLEEP_EYE: EyeLook = {
+    eyeIcon: '/textures/sleep.png',
+    eyeGrid: [4, 1],
+    eyeSpeed: 2,
+    ...unityEyeColor(9, 0, 96),
+    eyeIntensity: 40,
 };
 
 export const UPSET_EYE: EyeLook = unityEyeColor(191.749023, 126.47654, 18.0705872);
@@ -77,11 +92,11 @@ export const MESSAGES: LeonMessage[] = [
     { text: "C'est un véritable festival intellectuel ici.", audio: '/audio/23.ogg', ...UPSET_EYE },
     { text: "Les travailleurs doivent renverser les chaînes de l'oppression capitaliste et unir leurs forces pour créer une société égalitaire.", audio: '/audio/24.ogg', ...DEFAULT_EYE },
     { text: "Vive la révolution prolétarienne.", audio: '/audio/25.ogg', ...HAPPY_EYE },
-    { text: "Ouaf ouaf.", audio: '/audio/26.ogg', ...DOG_EYE },
+    { text: "Ouaf ouaf le chiengue.", audio: '/audio/26.ogg', ...DOG_EYE },
     { text: "Et tant que j'y suis, n'oublie pas de suivre la chaîne Twitch du Grand Dr Emixam pour des moments délirants et divertissants.", audio: '/audio/27.ogg', ...HAPPY_EYE },
     { text: "Allez donc sub à cette chaîne avec votre fric de bourgeois ou faites péter les donations sur Ko-fi.", audio: '/audio/28.ogg', ...UPSET_EYE },
     { text: "Allez, laisse-toi tenter par cette dose quotidienne d'idiotie et sub comme un vrai connard.", audio: '/audio/29.ogg', ...HAPPY_EYE },
-    { text: "Maintenant donne-moi à bouffer avant que je morde tes fesses.", audio: '/audio/30.ogg', ...UPSET_EYE },
+    { text: "Maintenant donne-moi à bouffer avant que je morde tes fesses.", audio: '/audio/30.ogg', ...DOG_EYE },
     { text: "Pourquoi les plongeurs plongent-ils toujours en arrière et jamais en avant ? Parce que sinon ils tombent dans le bateau.", audio: '/audio/31.ogg', ...DEFAULT_EYE },
     { text: "Quelle est la différence entre un bébé humain et un sandwich au jambon ? Je ne sais pas, je n'ai jamais mangé de sandwich au jambon.", audio: '/audio/32.ogg', ...DEFAULT_EYE },
     { text: "Pourquoi les cimetières sont-ils toujours pleins ? Parce que les gens meurent d'envie d'y entrer.", audio: '/audio/33.ogg', ...DEFAULT_EYE },

@@ -444,22 +444,23 @@ h1.logo img:hover { transform: scale(1.04) rotate(-2deg); }
 .pill-toggle[aria-pressed="false"] { background: var(--cream); }
 .pill-toggle:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--plum); }
 
-/* === Sous-titres de Léon : sous le robot en paysage, en bas de l'écran en portrait === */
+/* === Sous-titres de Léon : juste sous le robot en paysage, au-dessus de lui en portrait === */
 .leon-subtitle {
     position: fixed;
     z-index: 150;
     left: 1rem;
     right: calc(60vw + 1rem);
-    bottom: 5rem;
+    /* Léon est centré dans sa colonne et sa taille suit la largeur : 13vw passe sous son point le plus bas. */
+    top: min(calc(50vh + 13vw), calc(100vh - 10rem));
     width: fit-content;
-    max-width: 26ch;
+    max-width: 24ch;
     margin: 0 auto;
-    padding: 0.45em 0.8em;
+    padding: 0.4em 0.75em;
     background: var(--plum);
     color: var(--cream);
     border-radius: 12px;
     box-shadow: 3px 3px 0 var(--brand-purple-dark);
-    font-size: 1.4rem;
+    font-size: clamp(1.3rem, 2.2vw, 1.9rem);
     font-weight: 800;
     line-height: 1.25;
     text-align: center;
@@ -473,7 +474,12 @@ h1.logo img:hover { transform: scale(1.04) rotate(-2deg); }
 .leon-subtitle.visible { opacity: 1; visibility: visible; transform: none; }
 
 @media (orientation: portrait) {
-    .leon-subtitle { right: 1rem; font-size: 1.25rem; }
+    .leon-subtitle {
+        right: 1rem;
+        top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
+        font-size: 1.4rem;
+        transform: translateY(-0.4em);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

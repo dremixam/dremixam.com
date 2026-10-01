@@ -49,13 +49,17 @@ interface ShaderPatch {
 function addPatch(material: THREE.MeshStandardMaterial, patch: ShaderPatch) {
     const patches: ShaderPatch[] = (material.userData.leonPatches ??= []);
     patches.push(patch);
+    // Créés tout de suite, pour pouvoir être réglés avant la première compilation du shader.
+    const uniforms: LeonShaderUniforms = (material.userData.leonShaderUniforms ??= {
+        uTime: { value: 0 },
+        uAudioLevel: { value: 0 },
+    });
 
     material.onBeforeCompile = (shader) => {
-        shader.uniforms.uTime = { value: 0 };
-        shader.uniforms.uAudioLevel = { value: 0 };
+        shader.uniforms.uTime = uniforms.uTime;
+        shader.uniforms.uAudioLevel = uniforms.uAudioLevel;
         shader.fragmentShader = 'uniform float uTime;\nuniform float uAudioLevel;\n' + shader.fragmentShader;
         for (const p of patches) p.apply(shader);
-        material.userData.leonShaderUniforms = shader.uniforms;
     };
 
     const key = patches.map((p) => p.key).join('+');
@@ -63,7 +67,7 @@ function addPatch(material: THREE.MeshStandardMaterial, patch: ShaderPatch) {
     material.needsUpdate = true;
 }
 
-/** Uniforms d'un matériau patché, disponibles une fois le shader compilé par three.js. */
+/** Uniforms communs d'un matériau patché. */
 export function getLeonUniforms(material: THREE.Material): LeonShaderUniforms | undefined {
     return material.userData.leonShaderUniforms;
 }
@@ -114,12 +118,15 @@ export function applyFlipbookEye(material: THREE.MeshStandardMaterial, params: F
     material.userData.leonEyeColor = eyeColorUniform;
     material.userData.leonEyeIntensity = params.emissionIntensity ?? 1;
     setEyeColor(material, eyeColor);
+    const gridUniform = { value: new THREE.Vector2(gridSize[0], gridSize[1]) };
+    const speedUniform = { value: params.animationSpeed ?? 8 };
+    material.userData.leonEyeAnimation = { grid: gridUniform, speed: speedUniform };
 
     addPatch(material, {
         key: 'eye',
         apply(shader) {
-            shader.uniforms.uGrid = { value: new THREE.Vector2(gridSize[0], gridSize[1]) };
-            shader.uniforms.uSpeed = { value: params.animationSpeed ?? 8 };
+            shader.uniforms.uGrid = gridUniform;
+            shader.uniforms.uSpeed = speedUniform;
             shader.uniforms.uResolution = { value: params.resolution ?? 11 };
             shader.uniforms.uShape = { value: params.shape ?? 0.5 };
             shader.uniforms.uBevel = { value: params.bevel ?? 0.6 };
@@ -183,6 +190,14 @@ export function applyFlipbookEye(material: THREE.MeshStandardMaterial, params: F
 export function setEyeColor(material: THREE.Material, color: THREE.Color) {
     const uniform: THREE.IUniform<THREE.Color> | undefined = material.userData.leonEyeColor;
     uniform?.value.copy(color).multiplyScalar(material.userData.leonEyeIntensity ?? 1);
+}
+
+/** Change la grille [colonnes, lignes] et la vitesse (images par seconde) de l'animation de l'œil. */
+export function setEyeAnimation(material: THREE.Material, grid: [number, number], speed: number) {
+    const animation = material.userData.leonEyeAnimation;
+    if (!animation) return;
+    animation.grid.value.set(grid[0], grid[1]);
+    animation.speed.value = speed;
 }
 
 /** Découpe de Leon.shadergraph : le corps est masqué là où _DetachableMask.r passe sous le seuil (panneaux amovibles). */

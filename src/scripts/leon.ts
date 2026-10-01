@@ -12,11 +12,12 @@ import {
     applyEmissiveGlow,
     applyFlipbookEye,
     getLeonUniforms,
+    setEyeAnimation,
     setEyeColor,
     type LeonBaseColorParams,
     type LeonShaderParams,
 } from './leonMaterials';
-import { DEFAULT_EYE, MESSAGES, WELCOME_MESSAGE, type LeonMessage } from './leonMessages';
+import { DEFAULT_EYE, MESSAGES, SLEEP_EYE, WELCOME_MESSAGE, type EyeLook, type LeonMessage } from './leonMessages';
 import type { Subtitles } from './subtitles';
 
 /** Plus grande dimension du robot, en unités de scène (taille du modèle d'origine). */
@@ -179,6 +180,7 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement,
             legacyEyeMaterial.emissive = eyeColor(WELCOME_MESSAGE);
             legacyEyeMaterial.emissiveIntensity = 0;
         }
+        restEye();
 
         // Centre le modèle dans un pivot et lui donne la taille du modèle d'origine, quelle que soit l'échelle de l'export.
         model.updateMatrixWorld(true);
@@ -313,6 +315,11 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement,
         audioToggleButton.classList.toggle('bi-volume-up-fill', enabled);
         audioToggleButton.classList.toggle('bi-volume-mute-fill', !enabled);
         audioToggleButton.setAttribute('aria-pressed', String(enabled));
+        if (!enabled) {
+            currentAudio?.pause();
+            subtitles?.hide();
+        }
+        restEye();
     }
 
     audioToggleButton.addEventListener('click', () => {
@@ -325,41 +332,64 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement,
         }
     });
 
-    function setEyeIntensity(value: number) {
-        for (const material of shaderMaterials) {
+    /** Allume l'œil de 0 (éteint) à 1 (pleine intensité). */
+    function setEyeLevel(level: number) {
+        for (const material of eyeMaterials) {
             const audioLevel = getLeonUniforms(material)?.uAudioLevel;
-            if (audioLevel) audioLevel.value = Math.min(1, value / 64);
+            if (audioLevel) audioLevel.value = level;
         }
         if (legacyEyeMaterial) {
-            legacyEyeMaterial.emissiveIntensity = value / 4;
+            legacyEyeMaterial.emissiveIntensity = level * 16;
         }
     }
 
-    function eyeColor(message: LeonMessage): THREE.Color {
-        return new THREE.Color(message.eyeColor ?? DEFAULT_EYE.eyeColor).multiplyScalar(message.eyeIntensity ?? DEFAULT_EYE.eyeIntensity);
+    /** Niveau de l'œil d'après le volume moyen de la voix. */
+    function setEyeIntensity(averageVolume: number) {
+        setEyeLevel(Math.min(1, averageVolume / 64));
     }
 
-    /** Donne à l'œil la couleur et l'icône de la réplique. */
-    function showMessageOnEye(message: LeonMessage) {
-        const color = eyeColor(message);
-        for (const material of eyeMaterials) setEyeColor(material, color);
-        legacyEyeMaterial?.emissive.copy(color);
+    function eyeColor(look: EyeLook): THREE.Color {
+        return new THREE.Color(look.eyeColor ?? DEFAULT_EYE.eyeColor).multiplyScalar(look.eyeIntensity ?? DEFAULT_EYE.eyeIntensity);
+    }
 
-        loadIcon(message.eyeIcon ?? DEFAULT_EYE.eyeIcon)
-            .catch(() => loadIcon(DEFAULT_EYE.eyeIcon))
-            .then((icon) => {
-                for (const material of eyeMaterials) material.emissiveMap = icon;
-            });
+    let lookId = 0;
+
+    /** Donne à l'œil l'icône, la couleur et l'animation d'un aspect, dès que l'icône est chargée. */
+    async function showLook(look: EyeLook): Promise<boolean> {
+        const id = ++lookId;
+        const icon = await loadIcon(look.eyeIcon ?? DEFAULT_EYE.eyeIcon).catch(() => loadIcon(DEFAULT_EYE.eyeIcon));
+        if (id !== lookId) return false;
+
+        const color = eyeColor(look);
+        for (const material of eyeMaterials) {
+            material.emissiveMap = icon;
+            setEyeColor(material, color);
+            setEyeAnimation(material, look.eyeGrid ?? DEFAULT_EYE.eyeGrid, look.eyeSpeed ?? DEFAULT_EYE.eyeSpeed);
+        }
+        legacyEyeMaterial?.emissive.copy(color);
+        return true;
+    }
+
+    /** Œil au repos : animation de sommeil quand le son est coupé, éteint entre deux répliques. */
+    function restEye() {
+        if (audioEnabled) {
+            setEyeLevel(0);
+            return;
+        }
+        showLook(SLEEP_EYE).then((applied) => {
+            if (applied && !audioEnabled) setEyeLevel(1);
+        });
     }
 
     function preloadIcons() {
-        for (const message of [WELCOME_MESSAGE, ...MESSAGES]) {
+        for (const message of [WELCOME_MESSAGE, ...MESSAGES, SLEEP_EYE]) {
             if (message.eyeIcon) loadIcon(message.eyeIcon).catch(() => {});
         }
     }
 
     let audioContext: AudioContext | null = null;
     let analyser: AnalyserNode | null = null;
+    let currentAudio: HTMLAudioElement | null = null;
 
     function scheduleNextMessage() {
         timeout = setTimeout(() => {
@@ -386,6 +416,7 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement,
         }
         const meter = analyser!;
         const audio = new Audio(message.audio);
+        currentAudio = audio;
         audioContext.createMediaElementSource(audio).connect(meter);
         // requestAnimationFrame est suspendu dans un onglet caché, la fin de la réplique est aussi suivie ici.
         audio.addEventListener('ended', () => subtitles?.hide());
@@ -401,16 +432,16 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement,
                 return;
             }
             audio.pause();
-            setEyeIntensity(0);
+            restEye();
             subtitles?.hide();
             if (audioEnabled) scheduleNextMessage();
         }
 
-        showMessageOnEye(message);
+        showLook(message);
         audioContext.resume();
         audio.play().then(() => {
             subtitles?.show(message.text, audio);
             displayVolume();
-        }, () => setEyeIntensity(0));
+        }, restEye);
     }
 }
