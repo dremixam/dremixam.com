@@ -10,16 +10,16 @@ export interface StreamSlot {
 
 /** Twitch redirige l'aperçu d'une chaîne hors ligne vers une image par défaut. */
 export async function isLive(channel = CHANNEL): Promise<boolean> {
-    const res = await fetch(`https://static-cdn.jtvnw.net/previews-ttv/live_user_${channel}-80x45.jpg`, { cache: 'no-store' });
+    const res = await fetch(`https://static-cdn.jtvnw.net/previews-ttv/live_user_${channel}-80x45.jpg?t=${Date.now()}`, { cache: 'no-store' });
     return res.ok && !res.redirected;
 }
 
-/** Prochain créneau du planning Twitch qui n'est pas encore terminé. */
+/** Prochain créneau du planning Twitch qui n'a pas encore commencé. */
 export async function getNextStream(now = new Date()): Promise<StreamSlot | null> {
     const res = await fetch(`https://api.twitch.tv/helix/schedule/icalendar?broadcaster_id=${BROADCASTER_ID}`);
     if (!res.ok) return null;
     const slots = parseCalendar(await res.text())
-        .filter((slot) => slot.end > now)
+        .filter((slot) => slot.start > now)
         .sort((a, b) => a.start.valueOf() - b.start.valueOf());
     return slots[0] ?? null;
 }
