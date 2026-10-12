@@ -126,28 +126,21 @@ const [latestPost] = await getPosts('fr');
             const indicator = document.getElementById('status-indicator');
             const text = document.getElementById('status-text');
             if (!indicator || !text) return;
+            // Flux public de la page de statut Better Stack : [classe CSS, texte] pour chaque état global.
+            const states: Record<string, [string, string]> = {
+                operational: ['operational', 'Tous les services sont opérationnels'],
+                degraded: ['degraded', 'Certains services sont dégradés'],
+                maintenance: ['degraded', 'Maintenance en cours'],
+                downtime: ['downtime', 'Panne en cours'],
+            };
             try {
-                const url = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://status.dremixam.com/fr/badge');
-                const res = await fetch(url);
+                const res = await fetch('https://status.dremixam.com/fr/index.json', { signal: AbortSignal.timeout(8000) });
                 const json = await res.json();
-                const html = json.contents;
-                const colorMatch = html.match(/text-statuspage-(\w+)/);
-                const color = colorMatch ? colorMatch[1] : null;
-                const textMatch = html.match(/<div[^>]*>\s*([^<]+)\s*<\/div>\s*<\/a>/);
-                const statusText = textMatch ? textMatch[1].trim() : null;
-                if (color === 'green') {
-                    indicator.classList.add('operational');
-                    text.textContent = statusText || 'Tous les services sont opérationnels';
-                } else if (color === 'yellow' || color === 'orange') {
-                    indicator.classList.add('degraded');
-                    text.textContent = statusText || 'Perturbation en cours';
-                } else if (color === 'red') {
-                    indicator.classList.add('downtime');
-                    text.textContent = statusText || 'Panne en cours';
-                } else {
-                    text.textContent = 'État des services';
-                }
-            } catch (e) {
+                const state = states[json.data.attributes.aggregate_state];
+                if (!state) throw new Error();
+                indicator.classList.add(state[0]);
+                text.textContent = state[1];
+            } catch {
                 text.textContent = 'État des services';
             }
         })();
