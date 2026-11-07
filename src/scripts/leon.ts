@@ -22,6 +22,8 @@ import type { Subtitles } from './subtitles';
 
 /** Plus grande dimension du robot, en unités de scène (taille du modèle d'origine). */
 const MODEL_SIZE = 2;
+// Léon occupe environ 55 % de la largeur de sa colonne : au-delà de ce décalage, il serait coupé.
+const MAX_VIEW_SHIFT = 0.2;
 const GLOW_INTENSITY = 30;
 /** Volume de la voix de Léon, entre 0 et 1. */
 const VOICE_VOLUME = 0.8;
@@ -62,7 +64,7 @@ const FinalShader = {
     `,
 };
 
-export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement, subtitles?: Subtitles) {
+export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement, subtitles?: Subtitles, contentEdge?: HTMLElement | null) {
     let audioEnabled = false;
     let timeout: ReturnType<typeof setTimeout> | undefined;
     let lastMessage: LeonMessage | null = null;
@@ -302,10 +304,24 @@ export function initLeon(container: HTMLElement, audioToggleButton: HTMLElement,
         composer.render();
     }
 
+    /** En deux colonnes, décale la vue pour centrer Léon dans l'espace libre à gauche du contenu. */
+    function updateViewOffset() {
+        const width = container.offsetWidth;
+        const height = container.offsetHeight;
+        let shift = 0;
+        if (contentEdge && matchMedia('(orientation: landscape)').matches) {
+            const freeSpace = contentEdge.getBoundingClientRect().left;
+            shift = Math.min(Math.max(freeSpace / 2 - width / 2, 0), width * MAX_VIEW_SHIFT);
+        }
+        camera.setViewOffset(width, height, -shift, 0, width, height);
+        document.documentElement.style.setProperty('--leon-shift', `${Math.round(shift)}px`);
+    }
+    updateViewOffset();
+
     window.addEventListener('resize', () => {
         camera.aspect = container.offsetWidth / container.offsetHeight;
         camera.fov = (Math.atan(Math.tan(((horizontalFov / 2) * Math.PI) / 180) / camera.aspect) * 2 * 180) / Math.PI;
-        camera.updateProjectionMatrix();
+        updateViewOffset();
         renderer.setSize(container.offsetWidth, container.offsetHeight);
         composer.setSize(container.offsetWidth, container.offsetHeight);
     });

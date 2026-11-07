@@ -512,6 +512,7 @@ h1.logo img:hover { transform: scale(1.04) rotate(-2deg); }
     right: calc(60vw + 1rem);
     /* Léon est centré dans sa colonne et sa taille suit la largeur : 13vw passe sous son point le plus bas. */
     top: min(calc(50vh + 13vw), calc(100vh - 10rem));
+    translate: var(--leon-shift, 0px) 0;
     width: fit-content;
     max-width: 24ch;
     margin: 0 auto;

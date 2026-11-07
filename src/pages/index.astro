@@ -120,7 +120,7 @@ const [latestPost] = await getPosts('fr');
         const subtitle = document.getElementById('leonSubtitle');
         if (container && audioToggle) {
             const subtitles = subtitleToggle && subtitle ? initSubtitles(subtitleToggle, subtitle) : undefined;
-            initLeon(container, audioToggle, subtitles);
+            initLeon(container, audioToggle, subtitles, document.querySelector<HTMLElement>('.links'));
         }
     </script>
 
