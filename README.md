@@ -36,6 +36,7 @@ npm run build    # build statique dans dist/
 - `src/blog.ts` : `BLOG_PUBLISHED` pour mettre le blog en ligne (il est toujours visible en développement)
 - `src/scripts/leon.ts` : la scène Three.js de Léon (chargement du modèle, shaders, interactions)
 - `public/` : fichiers statiques servis tels quels (audio, glb, textures, CNAME...)
+- `public/blueprint/` : les dessins et le grain du fond, extraits de `background-stream.psd` (le dégradé et la grille sont en CSS)
 - `docs/unity-export-instructions.md` : instructions pour exporter une nouvelle skin de Léon depuis
   le projet Unity source vers un `.glb` exploitable par ce site
 

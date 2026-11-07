@@ -1,6 +1,8 @@
 /* === Tokens : piste « Autocollant », reprise du logo de la chaîne === */
 :root {
     --brand-purple: #6451a3;
+    --blueprint-center: #7a66ba;
+    --blueprint-edge: #513f8c;
     --brand-purple-dark: #4F2C81;
     --plum: #48274b;
     --orange: #f7b867;
@@ -26,7 +28,7 @@ html, body {
 }
 
 body {
-    background: var(--brand-purple);
+    background: var(--blueprint-edge);
     color: var(--cream);
     font-family: var(--font-body);
     font-weight: 500;
@@ -36,6 +38,64 @@ body {
 a:focus-visible, button:focus-visible {
     outline: 3px solid var(--cream);
     outline-offset: 3px;
+}
+
+/* === Fond : plan d'atelier repris de l'habillage de la chaîne === */
+.blueprint {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    background: url('/blueprint/grain.png'), radial-gradient(circle farthest-corner, var(--blueprint-center), var(--blueprint-edge));
+    background-blend-mode: overlay, normal;
+}
+
+/* Grille principale et grille fine, plus discrètes au centre de l'écran. */
+.blueprint::before {
+    --major: rgb(244 241 178 / 0.13);
+    --minor: rgb(244 241 178 / 0.06);
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right, var(--major) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--major) 1px, transparent 1px),
+        linear-gradient(to right, var(--minor) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--minor) 1px, transparent 1px);
+    background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+    mask-image: radial-gradient(circle, rgb(0 0 0 / 0.5) 11vw, #000 33vw);
+}
+
+/* Comme dans le PSD : opacité de 60 % et effacement progressif vers le centre de l'écran. */
+.drawings {
+    position: absolute;
+    inset: 0;
+    opacity: 0.6;
+    mask-image: radial-gradient(circle, transparent 12vw, #000 34vw);
+}
+
+.drawing { position: absolute; height: auto; }
+
+/* Deux colonnes : dessins éparpillés autour de Léon et dans la marge de droite. */
+@media (orientation: landscape) {
+    .canard { left: 4.5vw; top: 6vh; width: 9.5vw; rotate: -6deg; }
+    .pi { left: 21vw; top: 15vh; width: 3vw; rotate: 9deg; }
+    .communisme { left: 1.5vw; top: 60vh; width: 12vw; rotate: 4deg; }
+    .pipi-recette { left: 22vw; bottom: 4vh; width: 12vw; rotate: -3deg; }
+    .shrug { left: 15vw; bottom: 12vh; width: 3.2vw; rotate: 7deg; }
+    .leon-mk1 { right: 2.5vw; top: 11vh; width: min(14vw, 30vw - 130px - 3rem); rotate: 5deg; }
+    .pipi-bottle { right: 1vw; top: 55vh; width: 7.5vw; rotate: -5deg; }
+}
+
+/* Une colonne : seulement en haut de page, de part et d'autre de Léon. */
+@media (orientation: portrait) {
+    .canard { left: 4vw; top: 3vh; width: 19vw; rotate: -6deg; }
+    .leon-mk1 { right: 2vw; top: 1.5vh; width: 23vw; rotate: 5deg; }
+    .communisme, .pipi-recette, .pipi-bottle, .pi, .shrug { display: none; }
+}
+
+@media (max-height: 500px) {
+    .drawing { display: none; }
 }
 
 /* === Mise en page de l'accueil : Léon à gauche, contenu à droite === */
